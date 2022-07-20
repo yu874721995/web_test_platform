@@ -1,0 +1,8 @@
+FROM node:16.14.2
+RUN rm -f /etc/localtime && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ADD ./nextop_web_testplatform /opt/nextop_web_testplatform
+WORKDIR /opt/nextop_web_testplatform
+RUN npm install -g npm@8.6.0
+RUN npm install
+CMD npm run dev
+
