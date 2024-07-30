@@ -188,7 +188,7 @@
 
         <el-form-item
             label="所属项目" prop="project_id">
-          <el-select v-model="ruleForm.project_id">
+          <el-select v-model="ruleForm.project_id" clearable filterable>
             <el-option
                 v-for="item in project"
                 :key="item.id"
@@ -199,10 +199,18 @@
         </el-form-item>
 
         <el-form-item label="请求方式" prop="req_method">
-          <el-radio v-model="ruleForm.method" label="GET">GET</el-radio>
-          <el-radio v-model="ruleForm.method" label="POST">POST</el-radio>
-          <el-radio v-model="ruleForm.method" label="PUT">PUT</el-radio>
-          <el-radio v-model="ruleForm.method" label="DELETE">DELETE</el-radio>
+          <el-radio v-model="ruleForm.req_method" label="GET">GET</el-radio>
+          <el-radio v-model="ruleForm.req_method" label="POST">POST</el-radio>
+          <el-radio v-model="ruleForm.req_method" label="PUT">PUT</el-radio>
+          <el-radio v-model="ruleForm.req_method" label="DELETE">DELETE</el-radio>
+        </el-form-item>
+
+        <el-form-item label="接口参数类型" prop="content_type" style="width: 100%;float: left;">
+          <el-radio-group v-model="ruleForm.content_type">
+            <el-radio v-model="ruleForm.content_type" label="application/json">json</el-radio>
+            <el-radio v-model="ruleForm.content_type" label="form-data">data</el-radio>
+            <el-radio v-model="ruleForm.content_type" label="application/x-www-form-urlencoded">urlencoded</el-radio>
+          </el-radio-group>
         </el-form-item>
 
         <el-form-item label="接口路径" prop="url">
@@ -222,7 +230,7 @@
 
         <div style="position: fixed;z-index: 6666;margin-left: 550px;margin-top: 30px;">
           <el-form-item>
-          <el-button type="primary" @click="saveForm('ruleForm')">保存</el-button>
+          <!-- <el-button type="primary" @click="saveForm('ruleForm')">保存</el-button> -->
           <el-button type="primary" @click="keep_to_case()">保存转用例</el-button>
           <el-button @click="dialogVisible = false">取消</el-button>
         </el-form-item>
@@ -340,6 +348,8 @@ export default {
         console.log(res.data.params);
         this.ruleForm.params = res.data.params;
         this.ruleForm.responses = res.data.responses;
+        this.ruleForm.content_type = 'application/json'
+        this.ruleForm.req_method = res.data.method
         this.row_module = row.module;
       });
       this.title = "编辑接口";
@@ -390,12 +400,24 @@ export default {
         this.swagger_single_case.only_api = this.ruleForm.only_api;
         this.swagger_single_case.module = this.ruleForm.module;
         this.swagger_single_case.project_id = this.ruleForm.project_id;
+        this.swagger_single_case.single_body = this.ruleForm.params
+        this.swagger_single_case.group_body = this.ruleForm.params
+        this.swagger_single_case.assert_res = this.ruleForm.responses
+        this.swagger_single_case.content_type = this.ruleForm.content_type
+        this.swagger_single_case.creator_nickname = localStorage.getItem('username')
+        this.swagger_single_case.source = 'swagger转'
+        this.swagger_single_case.extract_param = {}
+        this.swagger_single_case.pre_sql = {}
+        this.swagger_single_case.end_sql = {}
+        this.swagger_single_case.use_fixture = {}
+        this.swagger_single_case.delay_time = 0
+        this.swagger_single_case.use_job = 0
       if (typeof(this.swagger_single_case.module)=='string'){
         this.$message.error("请选择模块")
       }else {
         this.saveForm('ruleForm');
         axios
-            .post("/api/api_case/case/convertApi", this.swagger_single_case)
+            .post("/api/test_case/CreateCase", this.swagger_single_case)
             .then((res) => {
               if (res.data.code === 10000) {
                 this.isLoading = false;
@@ -404,8 +426,8 @@ export default {
                   message: res.data.msg,
                   type: "success",
                 });
-                this.to_case_result = res.data.data;
-                // this.dialogVisible = false;
+                // this.to_case_result = res.data.data;
+                this.dialogVisible = false;
                 this.handleCurrentChange(1);
               } else {
                 this.isLoading = false;

@@ -32,7 +32,7 @@
             </el-table-column>
             <el-table-column style="background-color: #ffffff" fixed="right" label="操作" width="250" align="center">
               <template slot-scope="scope">
-                <el-button @click="init_project(scope.row)" type="text" size="small" v-has="{class:'75'}">初始化</el-button>
+                <el-button @click="init_project(scope.row)" type="text" size="small" v-has="{class:'31'}">初始化</el-button>
               </template>
             </el-table-column>
           </el-table>

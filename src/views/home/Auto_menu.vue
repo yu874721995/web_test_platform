@@ -40,8 +40,6 @@ export default {
     return {
     };
   },
-  methods: {
-  },
   computed: {
     ...mapGetters(["menuData"]),
     menuList() {
@@ -53,5 +51,8 @@ export default {
   //页面初始化渲染
   created() {
   },
+  methods: {
+    enterOperate() {}
+  }
 };
 </script>

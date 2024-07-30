@@ -30,7 +30,7 @@
 
         <div style="float: right; margin-right: 10px">
           <div style=" width: 100px; float: right; margin-top: 10px; height: 40px; text-align: center; ">
-            <el-button type="primary" size="small" style="background-color: #3573fe" @click="init" v-has="{class:'77'}">
+            <el-button type="primary" size="small" style="background-color: #3573fe" @click="init" v-has="{class:'87'}">
               新增配置
             </el-button>
           </div>
@@ -75,10 +75,10 @@
 
             <el-table-column style="background-color: #ffffff" fixed="right" label="操作" width="250" align="center">
               <template slot-scope="scope">
-                <el-button @click="update_config(scope.row)" type="text" size="small" v-has="{class:'81'}">编辑</el-button>
-                <el-button @click="delete_again_alter(scope.row)" type="text" size="small" style="color: red" v-has="{class:'82'}">删除
+                <el-button @click="update_config(scope.row)" type="text" size="small" v-has="{class:'37'}">编辑</el-button>
+                <el-button @click="delete_again_alter(scope.row)" type="text" size="small" style="color: red" v-has="{class:'38'}">删除
                 </el-button>
-                <el-button @click="run_config(scope.row)" type="text" size="small" v-has="{class:'83'}">测试一下</el-button>
+                <el-button @click="run_config(scope.row)" type="text" size="small" v-has="{class:'39'}">测试一下</el-button>
               </template>
             </el-table-column>
 

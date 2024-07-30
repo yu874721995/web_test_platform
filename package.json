@@ -1,13 +1,16 @@
 {
-  "name": "nextop_web_testplatform",
+  "name": "yinta_web_testplatform",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vue-cli-service serve --disableHostCheck=true",
-    "test": "vue-cli-service serve --mode test",
+    "build:dev": "vue-cli-service build --mode dev",
+    "build:sit": "vue-cli-service build --mode dev",
+    "test": "vue-cli-service serve --mode dev",
     "build": "vue-cli-service build",
     "build:test": "vue-cli-service build --mode test",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "build:prod":"vue-cli-service build --mode prod"
   },
   "dependencies": {
     "axios": "^0.25.0",
@@ -20,6 +23,7 @@
     "qs": "^6.10.3",
     "save": "^2.5.0",
     "sortablejs": "^1.15.0",
+    "sql-formatter": "^2.3.3",
     "stylus-loader": "^3.0.1",
     "vue": "^2.6.11",
     "vue-axios": "^3.4.1",

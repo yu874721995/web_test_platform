@@ -79,7 +79,7 @@
                     type="primary"
                     style="background-color: #3573fe"
                     @click="addgroup"
-                    v-has="{class:'120'}"
+                    v-has="{class:'76'}"
                 >新增
                 </el-button>
               </el-row>
@@ -102,9 +102,9 @@
               width="98%"
               :row-style="{ height: '40px' }"
               :cell-style="{ padding: '0px' }"
-              highlight-current-row="true"
-              stripe="true"
-              border="true"
+              :highlight-current-row="true"
+              :stripe="true"
+              :border="true"
               type="selection"
               @select="handleSelect"
               @selection-change="handleSelectionChange"
@@ -197,8 +197,8 @@
                     @click="putplant(scope.row, 'put')"
                     type="text"
                     size="small"
-                    v-if="scope.row.creator === user_name "
-                    v-has="{class:'121'}"
+                    v-if="scope.row.creator === user_name || user_name == 'yubei' || user_name == 'yangxi' || user_name == 'limeng'"
+                    v-has="{class:'77'}"
                 >编辑
                 </el-button
                 >
@@ -207,15 +207,23 @@
                     @click="deletecase(scope.row)"
                     size="small"
                     v-if="scope.row.creator === user_name "
-                    v-has="{class:'122'}"
+                    v-has="{class:'78'}"
                 >删除
+                </el-button
+                >
+                <el-button
+                    type="text"
+                    @click="excuone(scope.row)"
+                    size="small"
+                    v-has="{class:'74'}"
+                >执行一次
                 </el-button
                 >
                 <el-button
                     type="text"
                     @click="openexculist(scope.row)"
                     size="small"
-                    v-has="{class:'123'}"
+                    v-has="{class:'79'}"
                 >执行记录
                 </el-button
                 >
@@ -265,9 +273,9 @@
                 width="100%"
                 :row-style="{ height: '40px' }"
                 :cell-style="{ padding: '0px' }"
-                highlight-current-row="true"
-                stripe="true"
-                border="true"
+                :highlight-current-row="true"
+                :stripe="true"
+                :border="true"
                 type="selection"
             >
               <el-table-column
@@ -278,7 +286,7 @@
               >
               </el-table-column>
               <el-table-column
-                  prop="create_time"
+                  prop="created_time"
                   label="执行时间"
                   align="center"
                   width="200"
@@ -286,14 +294,14 @@
               </el-table-column>
               <el-table-column
                   :formatter="plan_status_view"
-                  prop="status"
+                  prop="report_status"
                   label="任务状态"
                   align="center"
                   width="100"
               >
               </el-table-column>
               <el-table-column
-                  prop="duration"
+                  prop="elapsed"
                   label="执行用时(秒)"
                   align="center"
                   width="100"
@@ -334,7 +342,9 @@
                   width="435"
               >
                 <template slot-scope="scope">
-                  <el-link type="primary">{{ scope.row.report_url }}</el-link>
+                  <el-link type="primary"
+                  @click="reportView(scope.row.id)"
+                  >查看报告</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -470,9 +480,9 @@
                 width="100%"
                 :row-style="{ height: '40px' }"
                 :cell-style="{ padding: '0px' }"
-                highlight-current-row="true"
-                stripe="true"
-                border="true"
+                :highlight-current-row="true"
+                :stripe="true"
+                :border="true"
                 type="selection"
                 @select="handleSelectCase"
                 @selection-change="handleSelectionChangeCase"
@@ -572,7 +582,7 @@
               <el-select v-model="group_list_page_body.projectId" clearable filterable
                          style="width: 150px; margin-left: 10px"
                          @change="select_project">
-                <el-option v-for="item in project_list" :key="item.id" :label="item.project_name" :value="item.id">
+                <el-option v-for="item in project" :key="item.id" :label="item.project_name" :value="item.id">
                 </el-option>
               </el-select>
             </div>
@@ -654,9 +664,9 @@
                 width="100%"
                 :row-style="{ height: '40px' }"
                 :cell-style="{ padding: '0px' }"
-                highlight-current-row="true"
-                stripe="true"
-                border="true"
+                :highlight-current-row="true"
+                :stripe="true"
+                :border="true"
                 type="selection"
                 @select="handleSelectGroup"
                 @selection-change="handleSelectionChangeGroup"
@@ -665,9 +675,9 @@
               <el-table-column type="selection" width="55"></el-table-column>
               <el-table-column prop="id" label="组合id" align="center" width="100"></el-table-column>
               <el-table-column prop="name" label="组合名称" width="250"></el-table-column>
-              <el-table-column prop="module" label="所属模块" width="200"></el-table-column>
+              <el-table-column prop="module" label="所属模块" :formatter="get_module_name" width="200"></el-table-column>
               <el-table-column prop="description" label="组合描述" width="300"></el-table-column>
-              <el-table-column prop="status" label="状态" width="200"></el-table-column>
+              <el-table-column prop="status" label="状态" width="200" :formatter="status_view"></el-table-column>
               <el-table-column prop="creator_nickname" label="创建人" width="150"></el-table-column>
             </el-table>
           </template>
@@ -703,15 +713,15 @@
       <el-form
           :model="ruleForm"
           :rules="rules"
-          inline-message="true"
-          status-icon="true"
+          :inline-message="true"
+          :status-icon="true"
           ref="ruleForm"
           label-width="auto"
       >
         <el-form-item
             label="计划名称:"
             prop="planName"
-            style="width: 500px;float:left;"
+            style="width: 50%;float: left;"
         >
           <el-input
               v-model="ruleForm.task_name"
@@ -719,7 +729,7 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="状态:" prop="status" style="width:500px;float:left;padding-left:25px;">
+        <el-form-item label="状态:" prop="status" style="width: 50%;float: left;">
           <el-radio v-model="ruleForm.status" label="1">启用</el-radio>
           <el-radio v-model="ruleForm.status" label="2">禁用</el-radio>
         </el-form-item>
@@ -727,7 +737,7 @@
         <el-form-item
             label="所属项目:"
             prop="project_id"
-            style="width: 500px;float:left;"
+            style="width: 50%;float: left;"
         >
           <el-select v-model="ruleForm.project_id" clearable filterable>
             <el-option
@@ -740,24 +750,22 @@
         </el-form-item>
         <el-form-item
             label="运行环境:"
-            :label-width="formLabelWidth"
             prop="env"
-            style="width: 500px;float:left;padding-left:25px;"
+            style="width: 50%;float: left;"
         >
           <el-cascader
               v-model="ruleForm.env"
               placeholder="请搜索运行环境"
               :options="env_options"
-              filterable
-              :props="{value:'id',label:'lable_name'}"
+              filterable clearable
+              :props="{value:'id',label:'env_name'}"
           ></el-cascader>
         </el-form-item>
 
         <el-form-item
             label="运行账号:"
-            :label-width="formLabelWidth"
             prop="account_id"
-            style="width: 500px;float:left;"
+            style="width: 50%;float: left;"
         >
           <el-select
               v-model="ruleForm.account_id"
@@ -774,11 +782,26 @@
         </el-form-item>
 
         <el-form-item
+            label="所属服务名称:"
+            prop="service_name"
+            style="width: 500px;float:left;"
+        >
+          <el-select v-model="ruleForm.service_name" multiple collapse-tags clearable filterable>
+            <el-option
+                v-for="item in uat_service_list"
+                :key="item.id"
+                :label="item.Assembly_name"
+                :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
             label="钉钉通知人:"
             prop="dingding"
-            style="width: 500px;float:left;padding-left:25px;"
+            style="width: 500px;float:left;"
         >
-          <el-select v-model="ruleForm.dingding" clearable filterable>
+          <el-select v-model="ruleForm.dingding" multiple collapse-tags clearable filterable>
             <el-option
                 v-for="item in mail_list"
                 :key="item.id"
@@ -787,10 +810,11 @@
             ></el-option>
           </el-select>
         </el-form-item>
+
         <el-form-item
             label="执行政策:"
             prop="task_type"
-            style="width: 500px;float:left;"
+            style="width: 55%;float: left;"
         >
           <el-select
               clearable filterable
@@ -807,10 +831,9 @@
 
         <el-form-item
             label="执行时间:"
-            id="times"
-            style="margin-top: 22px; display: none;width: 500px;float:left;"
+            style="margin-top: 22px;width: 50%;float: left;"
             prop="times"
-
+            v-if="ruleForm.task_type=='cron'||ruleForm.task_type=='interval'"
         >
           <el-input
               type="textarea"
@@ -823,9 +846,9 @@
 
         <el-form-item
             label="执行时间:"
-            id="date_time"
-            style="margin-top: 22px; display: none;width: 500px;float:left;"
+            style="margin-top: 22px;width: 50%;float: left;"
             prop="datetimes"
+            v-if="ruleForm.task_type=='date'"
         >
           <el-col :span="7">
             <el-date-picker
@@ -841,7 +864,7 @@
         <el-form-item label="用例列表:" prop="caseId_list" style="float: left;width:1400px;">
 
           <el-tabs v-model="activeName" @tab-click="handleClick" style="width:90%;">
-            <el-tab-pane label="按用例添加" name="first">
+            <!-- <el-tab-pane label="按用例添加" name="first">
 
               <div style="margin-left:0;float: left; width: 100%; text-align: center;">
                 <el-button type="primary" @click="caselist" style="float: left;margin-bottom: 10px;">添加明细</el-button>
@@ -867,29 +890,35 @@
                 </el-table>
 
               </div>
-            </el-tab-pane>
+            </el-tab-pane> -->
 
-            <el-tab-pane label="按组合添加" name="two">
+            <el-tab-pane label="按组合添加" name="first">
               <div style="margin-left:0;float: left; width: 100%; text-align: center;">
                 <el-button type="primary" @click="grouplist" style="float: left;margin-bottom: 10px;">添加明细</el-button>
                 <el-button type="primary" @click="selectcheckGroup=[]" style="float: left;margin-bottom: 10px;">全部移除
                 </el-button>
                 <el-form-item style="float: right;width: 150px;">
                   <el-button type="primary" @click="submitForm('ruleForm')" style="float: left;">保存</el-button>
-                  <el-button @click="dialogVisible = false;this.selectcheckGroup=[]" style="float: left;">取消</el-button>
+                  <el-button @click="dialogVisible = false" style="float: left;">取消</el-button>
                 </el-form-item>
 
                 <el-table
                     :data="selectcheckGroup" :v-loading="isLoading" style="font-size: 13px"
                     :header-cell-style="{ background: '#E7EAED' }" height="500"
+                    ref="singleCaseList" row-key="id"
                     width="100%" :row-style="{ height: '40px' }" :cell-style="{ padding: '0px' }"
                     :highlight-current-row="true" :stripe="true" :border=true>
                   <el-table-column prop="id" label="组合id" align="center" width="100"></el-table-column>
                   <el-table-column prop="name" label="组合名称" width="250"></el-table-column>
-                  <el-table-column prop="module" label="所属模块" width="200"></el-table-column>
+                  <el-table-column prop="module" label="所属模块" :formatter="get_module_name" width="200"></el-table-column>
                   <el-table-column prop="description" label="组合描述" width="300"></el-table-column>
-                  <el-table-column prop="status" label="状态" width="200"></el-table-column>
+                  <el-table-column prop="status" label="状态" width="200" :formatter="status_view"></el-table-column>
                   <el-table-column prop="creator_nickname" label="创建人" width="150"></el-table-column>
+                  <el-table-column label="操作" width="150">
+                  <template slot-scope="scope">
+                    <el-button type="text" @click="delete_select_case(scope.$index)" size="small">从计划中移除</el-button>
+                  </template>
+                  </el-table-column>
                 </el-table>
               </div>
             </el-tab-pane>
@@ -912,10 +941,12 @@ export default {
   data() {
     return {
       user_name: "",
+      isLoading: false,
       //分页请求数据
       list_page_body: {
         page: 1,
         limit: 20,
+        creator:localStorage.getItem("username")
       },
       pickerOptions: {
         disabledDate(time) {
@@ -924,11 +955,13 @@ export default {
       },
       case_list_page_body: {
         page: 1,
-        size: 10
+        size: 10,
+        create_user:localStorage.getItem("username")
       },
       group_list_page_body: {
         page: 1,
-        size: 10
+        size: 10,
+        create_user:localStorage.getItem("username")
       },
       plant_excu_list_page_body: {
         page: 1,
@@ -960,6 +993,7 @@ export default {
       selectcheckCase: [],
       selectcheckGroup: [],
       mail_list: [],
+      uat_service_list:[],
       account: [],
       project: [],
       caselistdata: [],
@@ -994,12 +1028,16 @@ export default {
         project_id: [
           {required: true, message: "请选择所属项目", trigger: "blur"},
         ],
+        service_name: [
+          {required: true, message: "请填写对应服务名称", trigger: "blur"},
+        ],
         // times: [{validator: checkJson,message: "请输入正确的json格式执行时间",trigger: "blur",}]
       },
       style: "height:" + (document.body.clientHeight - 60) + "px",
     };
   },
   methods: {
+    select_project() {},
     //初始化排序列表
     rowDrop() {
       console.log(this.$refs.singleCaseList.$el.querySelectorAll('.el-table__body-wrapper > table > tbody'))
@@ -1010,8 +1048,8 @@ export default {
           dataTransfer.setData('Text', '')
         },
         onEnd: evt => {
-          const targetRow = this.selectcheckCase.splice(evt.oldIndex, 1)[0];
-          this.selectcheckCase.splice(evt.newIndex, 0, targetRow);
+          const targetRow = this.selectcheckGroup.splice(evt.oldIndex, 1)[0];
+          this.selectcheckGroup.splice(evt.newIndex, 0, targetRow);
         }
       });
     },
@@ -1029,7 +1067,7 @@ export default {
           }
           if (this.ruleForm.times) {
             console.log(this.ruleForm.times);
-            this.ruleForm.times = JSON.parse(this.ruleForm.times);
+            this.ruleForm.times = eval('(' + this.ruleForm.times + ')');
           }
           if (this.title === "编辑计划") {
             axios
@@ -1097,14 +1135,14 @@ export default {
     chose_plan_policy(val) {
       console.log(this.ruleForm);
       if (val === "cron") {
-        document.getElementById("times").style.display = "block";
+        // document.getElementById("times").style.display = "block";
         this.$set(
             this.ruleForm,
             "times",
             '{"year":"2022","month":"1-12","day_of_week":"mon-fri","hour":"1-23","minute":"1-59","second":"10"}'
         );
       } else if (val === "interval") {
-        document.getElementById("times").style.display = "block";
+        // document.getElementById("times").style.display = "block";
         this.$set(
             this.ruleForm,
             "times",
@@ -1112,12 +1150,12 @@ export default {
         );
       } else if (val === "date") {
         this.$set(this.ruleForm, "datetimes", "");
-        document.getElementById("times").style.display = "none";
-        document.getElementById("date_time").style.display = "block";
+        // document.getElementById("times").style.display = "none";
+        // document.getElementById("date_time").style.display = "block";
       } else {
         this.$set(this.ruleForm, "now", "");
-        document.getElementById("times").style.display = "none";
-        document.getElementById("date_time").style.display = "none";
+        // document.getElementById("times").style.display = "none";
+        // document.getElementById("date_time").style.display = "none";
       }
       console.log(this.ruleForm);
     },
@@ -1208,23 +1246,37 @@ export default {
       this.group_list_page_body.page = val;
       this.grouplist();
     },
+    excuone(row) {
+      axios.post('/api/test_plant/execution_one_plant', {excu_id: row.id}).then(
+          (res) => {
+            if (res.data.code == 10000) {
+              this.$message(
+                  {
+                    duration: 2000,
+                    message: res.data.msg,
+                    type: "success",
+                  }
+              )
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          }
+      )
+    },
 
     //添加/编辑dialog初始化时执行方法
     openform() {
       if (this.ruleForm.task_type === "cron") {
-        document.getElementById("times").style.display = "block";
+        // document.getElementById("times").style.display = "block";
         this.$set(this.ruleForm, "times", this.ruleForm.exec_time);
       } else if (this.ruleForm.task_type === "interval") {
         console.log(222);
-        document.getElementById("times").style.display = "block";
+        // document.getElementById("times").style.display = "block";
         this.$set(this.ruleForm, "times", this.ruleForm.exec_time);
       } else if (this.ruleForm.task_type === "date") {
-        document.getElementById("times").style.display = "none";
-        document.getElementById("date_time").style.display = "block";
+        // document.getElementById("times").style.display = "none";
+        // document.getElementById("date_time").style.display = "block";
         this.$set(this.ruleForm, "datetimes", this.ruleForm.exec_time);
-      } else {
-        document.getElementById("times").style.display = "none";
-        document.getElementById("date_time").style.display = "none";
       }
       console.log(this.ruleForm);
     },
@@ -1239,9 +1291,11 @@ export default {
       this.ruleForm.case_list = row.case_list && row.case_list !== '' ? eval(row.case_list) : [];
       this.ruleForm.group_list = row.group_list && row.group_list !== '' ? eval(row.group_list) : [];
       this.ruleForm.status = String(row.status);
-      body.caseList = this.ruleForm.case_list && this.ruleForm.case_list !== [] ? this.ruleForm.case_list : [];
-      body.caseGroupList = this.ruleForm.group_list && this.ruleForm.group_list !== [] ? this.ruleForm.group_list : [];
-      axios.post('/api/api_case/case/get', body).then((res) => {
+      this.ruleForm.dingding = eval(row.dingding)
+      this.ruleForm.service_name = eval(row.service_name)
+      body.caseList = this.ruleForm.case_list ? this.ruleForm.case_list : [];
+      body.caseGroupList = this.ruleForm.group_list ? this.ruleForm.group_list : [];
+      axios.post('/api/test_plant/PlantCaseList', body).then((res) => {
         if (res.data.code === 10000) {
           this.selectcheckCase = res.data.data.case;
           this.selectcheckGroup = res.data.data.cases;
@@ -1296,8 +1350,8 @@ export default {
         task_type: "",
       };
       this.is_case = "点击选择";
-      document.getElementById("times").style.display = "none";
-      document.getElementById("date_time").style.display = "none";
+      // document.getElementById("times").style.display = "none";
+      // document.getElementById("date_time").style.display = "none";
     },
     //删除计划
     deletecase(row) {
@@ -1325,6 +1379,25 @@ export default {
         row.state = 0;
       }
     },
+    reportView(reportId){
+      axios
+          .post("/api/test_case/reportView",{reportId:reportId})
+          .then((res) => {
+            //api接口判断为code=10000成功
+            if (res.data["code"] === 10000) {
+              this.report_url = res.data.report_url
+              window.open('http://test-platform.sit.yintaerp.com'+this.report_url)
+            } else {
+              //失败提示
+              this.$message.error(res.data.msg);
+            }
+          })
+          .catch((error) => {
+            this.is_data = false;
+            console.log(error); //  错误处理 相当于error
+            this.$message.error("服务器错误,请联系测试人员");
+          });
+    },
     //~
     handleSelectCase(selection, row) {
       if (selection.indexOf(row) !== -1) {
@@ -1341,9 +1414,17 @@ export default {
         row.state = 0;
       }
     },
+        //删除选中的明细用例
+    delete_select_case(index) {
+      this.selectcheckGroup.splice(index, 1)
+    },
     //确认选择用例时执行方法
     ok() {
-      if (this.selectcheckCase.length !== 0) {
+      if (this.selectcheck.length !== 0) {
+        this.selectcheck.forEach((item)=>{
+          this.selectcheckCase.push(item);
+          this.ruleForm.case_list.push(item.id);
+        })
         this.caselistdialog = false;
         this.rowDrop();
       } else {
@@ -1351,8 +1432,13 @@ export default {
       }
     },
     ok_group() {
-      if (this.selectcheckGroup.length !== 0) {
+      if (this.selectcheck.length !== 0) {
+        this.selectcheck.forEach((item)=>{
+          this.selectcheckGroup.push(item)
+          this.ruleForm.group_list.push(item.id);
+        })
         this.grouplistdialog = false;
+        this.rowDrop();
       } else {
         this.$message.error("请先选择组合");
       }
@@ -1363,17 +1449,16 @@ export default {
     },
     //选择用例时，每选中一条，执行一次该方法
     handleSelectionChangeCase(val) {
+      this.selectcheck = [];
       val.forEach((item) => {
-        this.selectcheckCase.push(item);
-        this.ruleForm.case_list.push(item.id);
+        this.selectcheck.push(item);
       })
     },
     //选择用例时，每选中一条，执行一次该方法
     handleSelectionChangeGroup(val) {
-      console.log(val)
+      this.selectcheck = []
       val.forEach((item) => {
-        this.selectcheckGroup.push(item);
-        this.ruleForm.group_list.push(item.id);
+        this.selectcheck.push(item);
       })
     },
     //切换tags时触发，预留
@@ -1384,7 +1469,7 @@ export default {
     caselist() {
       this.caselistdialog = true;
       axios
-          .post("/api/api_case/case/page", this.case_list_page_body)
+          .post("/api/test_case/CaseList", this.case_list_page_body)
           .then((res) => {
             this.caselistdata = res.data.data;
             this.case_total = res.data.totalNum;
@@ -1395,7 +1480,7 @@ export default {
     grouplist() {
       this.grouplistdialog = true;
       axios
-          .post("/api/api_case/cases/page", this.group_list_page_body)
+          .post("/api/test_case/GroupCaseList", this.group_list_page_body)
           .then((res) => {
             this.grouplistdata = res.data.data;
             this.group_total = res.data.totalNum;
@@ -1424,7 +1509,7 @@ export default {
     //初始化获取账号
     get_account() {
       axios
-          .post("/api/test_management/AccountList", this.list_page_body)
+          .post("/api/test_management/AccountList", {page:1,limit:1000})
           .then((res) => {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
@@ -1500,12 +1585,10 @@ export default {
     },
     //列表映射计划执行状态
     plan_status_view(raw) {
-      if (raw.status === 1) {
+      if (raw.report_status === 0) {
         return '执行中'
-      } else if (raw.status === 2) {
+      } else if (raw.report_status === 1) {
         return '执行完成'
-      } else if (raw.status === 5) {
-        return '任务异常'
       }
     },
     //初始化获取模块
@@ -1531,7 +1614,7 @@ export default {
     get_tag_name(raw) {
       let val = null;
       this.tags.forEach((item) => {
-        if (raw.tag === String(item.value)) {
+        if (raw.tag === item.value) {
           val = item.label
         }
       })
@@ -1539,25 +1622,45 @@ export default {
     },
     //列表映射钉钉名称
     get_dingding_woman(raw) {
+      let data = []
       let val = null;
-      this.mail_list.forEach((item) => {
-        if (raw.dingding === item.id) {
+      if(raw.dingding){
+      eval(raw.dingding).forEach((ding) => {
+        this.mail_list.forEach((item) => {
+        if (ding === item.id) {
           val = item.ding_name
+          data.push(val)
         }
       })
-      return val
+      })}
+      
+      return data.join(',')
+    },
+    get_uat_service_name(raw) {
+      let data = []
+      let val = null;
+      eval(raw.service_name).forEach((service_name) => {
+        this.uat_service_list.forEach((item) => {
+        if (service_name === item.id) {
+          val = item.Assembly_name
+          data.push(val)
+        }
+      })
+      }) 
+      
+      return data.join(',')
     },
     //列表映射模块名称
     get_module_name(raw) {
       let val = null;
       if (raw.module && raw.module !== "") {
         this.module_options.forEach((item) => {
-          if (raw.module[0] === item.id) {
+          if (eval(raw.module)[0] === item.id) {
             val = item.name
           }
           if (item.children) {
             item.children.forEach((dow_item) => {
-              if (raw.module[1] === dow_item.id) {
+              if (eval(raw.module)[1] === dow_item.id) {
                 val += '-'
                 val += dow_item.name
               }
@@ -1575,6 +1678,13 @@ export default {
       axios.post('/api/test_management/mail_list', {page: 1, limit: 1000}).then((res) => {
         if (res.data.code === 10000) {
           this.mail_list = res.data.items;
+        }
+      })
+    },
+    get_uat_service_name_list() {
+      axios.post('/api/test_tools/uat_service_list', {page: 1, limit: 1000}).then((res) => {
+        if (res.data.code === 10000) {
+          this.uat_service_list = res.data.data;
         }
       })
     },
@@ -1599,6 +1709,7 @@ export default {
     this.get_env();
     this.get_moudle();
     this.get_mail_list();
+    this.get_uat_service_name_list();
     this.get_user_name();
   },
 };

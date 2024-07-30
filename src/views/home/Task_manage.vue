@@ -75,7 +75,7 @@
                     type="primary"
                     style="background-color: #3573fe"
                     @click="addgroup"
-                    v-has="{class:'115'}"
+                    v-has="{class:'71'}"
                 >新增
                 </el-button>
               </el-row>
@@ -96,9 +96,9 @@
               width="98%"
               :row-style="{ height: '40px' }"
               :cell-style="{ padding: '0px' }"
-              highlight-current-row="true"
-              stripe="true"
-              border="true"
+              :highlight-current-row="true"
+              :stripe="true"
+              :border="true"
               type="selection"
               @select="handleSelect"
               @selection-change="handleSelectionChange">
@@ -185,7 +185,7 @@
             >
               <template slot-scope="scope">
                 <el-button @click="putplant(scope.row,'put')" type="text" size="small"
-                           v-if="scope.row.creator === user_name " v-has="{class:'116'}">编辑
+                           v-if="scope.row.creator === user_name " v-has="{class:'72'}">编辑
                 </el-button
                 >
                 <el-button
@@ -193,14 +193,14 @@
                     @click="deletecase(scope.row)"
                     size="small"
                     v-if="scope.row.creator === user_name "
-                v-has="{class:'117'}">删除
+                v-has="{class:'73'}">删除
                 </el-button
                 >
                 <el-button
                     type="text"
                     @click="excuone(scope.row)"
                     size="small"
-                    v-has="{class:'118'}"
+                    v-has="{class:'74'}"
                 >执行一次
                 </el-button
                 >
@@ -208,7 +208,7 @@
                     type="text"
                     @click="openexculist(scope.row)"
                     size="small"
-                    v-has="{class:'119'}"
+                    v-has="{class:'75'}"
                 >执行记录
                 </el-button
                 >
@@ -250,9 +250,9 @@
                 width="100%"
                 :row-style="{ height: '40px' }"
                 :cell-style="{ padding: '0px' }"
-                highlight-current-row="true"
-                stripe="true"
-                border="true"
+                :highlight-current-row="true"
+                :stripe="true"
+                :border="true"
                 type="selection">
               <el-table-column
                   label="序号"
@@ -414,9 +414,9 @@
                 width="100%"
                 :row-style="{ height: '40px' }"
                 :cell-style="{ padding: '0px' }"
-                highlight-current-row="true"
-                stripe="true"
-                border="true"
+                :highlight-current-row="true"
+                :stripe="true"
+                :border="true"
                 type="selection"
                 @select="handleSelectCase"
                 @selection-change="handleSelectionChangeCase">
@@ -508,8 +508,8 @@
       <el-form
           :model="ruleForm"
           :rules="rules"
-          inline-message="true"
-          status-icon="true"
+          :inline-message="true"
+          :status-icon="true"
           ref="ruleForm"
           label-width="auto"
       >
@@ -545,17 +545,18 @@
         </el-form-item>
 
 
-        <el-form-item label="执行时间" id='times' style="margin-top: 22px;display: none;" prop="times">
+        <el-form-item label="执行时间" id='times' style="margin-top: 22px;" prop="times">
           <el-input
               type="textarea"
               autosize
               @blur="jsonprint('times')"
               v-model="ruleForm.times"
               placeholder='请输入单接口执行时的接口参数，使用键值对形式，例如{"status":200}'
+              v-if="ruleForm.task_type=='cron'||ruleForm.task_type=='interval'"
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="执行时间" id="date_time" style="margin-top:22px;display: none;" prop="datetimes">
+        <el-form-item label="执行时间" id="date_time" style="margin-top:22px;" prop="datetimes" v-if="ruleForm.task_type=='date'">
           <el-col :span="7">
             <el-date-picker v-model="ruleForm.datetimes" type="datetime" placeholder="选择日期时间"></el-date-picker>
           </el-col>
@@ -782,19 +783,13 @@ export default {
     chose_plan_policy(val) {
       console.log(this.ruleForm)
       if (val === "cron") {
-        document.getElementById("times").style.display = 'block';
         this.$set(this.ruleForm, 'times', '{"year":"2022","month":"1-12","day_of_week":"mon-fri","hour":"1-23","minute":"1-59","second":"10"}')
       } else if (val === "interval") {
-        document.getElementById("times").style.display = 'block';
         this.$set(this.ruleForm, 'times', '{"weeks":0,"days":0,"hours":0,"minutes":0,"seconds":0}')
       } else if (val === "date") {
         this.$set(this.ruleForm, 'datetimes', '')
-        document.getElementById("times").style.display = 'none';
-        document.getElementById("date_time").style.display = 'block';
       } else {
         this.$set(this.ruleForm, 'now', '')
-        document.getElementById("times").style.display = 'none';
-        document.getElementById("date_time").style.display = 'none';
       }
       console.log(this.ruleForm)
     },
@@ -895,19 +890,12 @@ export default {
     },
     openform() {
       if (this.ruleForm.task_type === "cron") {
-        document.getElementById("times").style.display = 'block';
         this.$set(this.ruleForm, 'times', this.ruleForm.times)
       } else if (this.ruleForm.task_type === "interval") {
         console.log(222)
-        document.getElementById("times").style.display = 'block';
         this.$set(this.ruleForm, 'times', this.ruleForm.times)
       } else if (this.ruleForm.task_type === "date") {
         this.$set(this.ruleForm, 'datetimes', this.ruleForm.exec_time)
-        document.getElementById("times").style.display = 'none';
-        document.getElementById("date_time").style.display = 'block';
-      } else {
-        document.getElementById("times").style.display = 'none';
-        document.getElementById("date_time").style.display = 'none';
       }
       console.log(this.ruleForm)
     },
@@ -960,8 +948,6 @@ export default {
         remark: ''
 
       };
-      document.getElementById("times").style.display = 'none';
-      document.getElementById("date_time").style.display = 'none';
     },
     deletecase(row) {
       axios.post("/api/test_plant/delete_job", {excu_id: row.id}).then((res) => {

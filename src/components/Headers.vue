@@ -2,9 +2,10 @@
   <div>
     <div id="home_logo_div">
       <img
-        src="../views/home/statc/logo.png"
+        src="../views/home/statc/logo_yinta.png"
         class="home_logo"
         alt="nextop"
+        style="height: 50px;"
         @click="home_click"
       />
     </div>
@@ -69,9 +70,13 @@ export default {
         window.localStorage.setItem("activeName", "Tapd_Project_home");
         this.$router.push(this.return_header_firstMenu("Tapd_Project_home"),
         );
-      } else {
+      } else if (name === "test_tool") {
         window.localStorage.setItem("activeName", "test_tool");
         this.$router.push(this.return_header_firstMenu("test_tool"));
+      }
+      else if (name === "Env_Navigation") {
+        window.localStorage.setItem("activeName", "Env_Navigation");
+        this.$router.push(this.return_header_firstMenu("Env_Navigation"));
       }
     },
     user_icon_click() {
@@ -144,8 +149,10 @@ export default {
         this.$router.push({ name: 'Home' });
       } else if (this.activeName === "Tapd_Project_home") {
         this.$router.push({ name: this.return_header_firstMenu("Tapd_Project_home") });
-      } else {
+      } else if (this.activeName === "test_tool") {
         this.$router.push({ name: this.return_header_firstMenu("test_tool") });
+      } else if (this.activeName === "Env_Navigation") {
+        this.$router.push({ name: this.return_header_firstMenu("Env_Navigation") });
       }
     },
     //默认页面取对应权限下的第一个页面的name，所以必须要配置

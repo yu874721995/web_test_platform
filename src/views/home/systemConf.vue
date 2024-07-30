@@ -47,7 +47,7 @@
                   type="primary"
                   style="background-color: #3573fe"
                   @click="addAccount"
-                  v-has="{class:'84'}"
+                  v-has="{class:'33'}"
               >新增
               </el-button>
             </el-row>
@@ -110,6 +110,7 @@
                     @click="putAccount(scope.row)"
                     type="text"
                     size="small"
+                    v-has="{class:'40'}"
                 >编辑
                 </el-button
                 >

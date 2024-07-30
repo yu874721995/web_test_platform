@@ -1,7 +1,7 @@
 <template>
   <div id="building">
     <div>
-      <svg
+      <svg 
         class="svg-left"
         width="1260"
         height="1243"
@@ -356,7 +356,7 @@
           </filter>
         </defs>
       </svg>
-      <img id="logo" src="../home/statc/logo.png" alt="Smiley face" />
+      <img id="logo" src="../home/statc/logo_yinta.png" alt="Smiley face" />
       <div id="login">
         <div id="login-2">
           <div id="login-3">
@@ -429,7 +429,7 @@
           </div>
           <div id="login-4">
             <img
-              src="../home/statc/logo-nextop-API.png"
+              src="../home/statc/logo_yinta.png"
               alt="Smiley face"
               width="140"
               height="32"
@@ -660,7 +660,7 @@ export default {
 }
 #logo {
   width: 140px;
-  height: 32px;
+  height: 50px;
   position: absolute;
   left: 5%;
   top: 10%;

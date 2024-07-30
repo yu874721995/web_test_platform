@@ -70,7 +70,7 @@
                   type="primary"
                   style="background-color: #3573fe"
                   @click="addAccount(1)"
-                  v-has="{class:'103'}"
+                  v-has="{class:'59'}"
               >新增
               </el-button>
             </el-row>
@@ -98,6 +98,8 @@
               :border="true"
               type="selection"
               row-key="id"
+              lazy
+              :load="table_load"
               :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
           >
             >
@@ -105,7 +107,7 @@
                 :formatter="get_project_name"
                 prop="project_id"
                 label="所属项目"
-                align="center"
+                align="left"
                 width="250"
             >
             </el-table-column>
@@ -170,11 +172,11 @@
             >
               <template slot-scope="scope">
                 <el-button
-                    v-if="scope.row.type == 1"
-                    @click="addAccount(2, scope.row)"
+                    v-if="scope.row.type == 1 || scope.row.type == 2"
+                    @click="addAccount(scope.row.type + 1, scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'104'}"
+                    v-has="{class:'60'}"
                 >增加下级分类
                 </el-button
                 >
@@ -182,7 +184,7 @@
                     @click="putAccount(scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'105'}"
+                    v-has="{class:'61'}"
                 >编辑
                 </el-button
                 >
@@ -192,7 +194,7 @@
                     size="small"
                     style="color:red"
                     v-if="scope.row.status==1"
-                    v-has="{class:'106'}"
+                    v-has="{class:'62'}"
                 >禁用
                 </el-button
                 >
@@ -217,8 +219,8 @@
             v-on:size-change="handleSizeChange"
             v-on:current-change="handleCurrentChange"
             :current-page="list_page_body.page"
-            :page-sizes="[20, 50, 100]"
-            :page-size="20"
+            :page-sizes="[10, 20,50, 100]"
+            :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total"
             style="float: right; margin-top: 10px; margin-right: 20px"
@@ -276,7 +278,7 @@
                 style="width: 150px; margin-left: 10px"
             >
               <el-option
-                  v-for="item in project_data"
+                  v-for="item in form_module_data"
                   :key="item.id"
                   :label="item.name"
                   :value="item.id"
@@ -351,12 +353,15 @@ export default {
       mail_list: [],
       //新增项目的显示
       addAccountdialog: false,
+      allData: [],
       //表格
       project_data: [],
+      form_module_data:[],
       project: [],
       //总条数
       total: 0,
       title: '新增模块',
+      isdisabled: false
     };
   },
   methods: {
@@ -365,6 +370,23 @@ export default {
       this.list_page_body.page = 1;
       this.list_page_body.limit = 20;
     },
+    table_load(tree, treeNode, resolve) {
+      console.log(tree, treeNode)
+      console.log(treeNode)
+      setTimeout(() => {
+        resolve(tree.childrens)
+      }, 1000)
+    },
+    setTreeData(list) {
+      for (let i = 0; i < list.length; i++) {
+        list[i].hasChildren = !!list[i].children?.length
+        list[i].childrens = list[i].children
+        delete list[i].children
+        if (list[i].hasChildren) {
+          this.setTreeData(list[i].childrens)
+        }
+      }
+    },
     //列表数据请求
     getList() {
       axios
@@ -372,7 +394,19 @@ export default {
           .then((res) => {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
-              this.project_data = res.data["items"];
+              const allData = res.data.items
+              this.setTreeData(allData)
+              console.log(allData)
+              this.project_data = allData
+              console.log(this.project_data)
+              this.form_module_data = JSON.parse(JSON.stringify(res.data.items))
+              this.form_module_data.forEach((form_data)=>{
+                if(form_data.children && form_data.children != []){
+                  form_data.children.forEach((two_data)=>{
+                    this.form_module_data.push(two_data)
+                  })
+                }
+              })
               this.total = res.data["count"];
               this.is_data = true;
             } else {
@@ -381,9 +415,8 @@ export default {
               this.$message.error(res.data.msg);
             }
           })
-          .catch((error) => {
+          .catch(() => {
             this.is_data = false;
-            console.log(error); //  错误处理 相当于error
             this.$message.error("服务器错误,请联系测试人员");
           });
     },
@@ -397,7 +430,7 @@ export default {
       this.list_page_body.page = val;
       this.getList();
     },
-    //新增项目
+    //增加模块
     addAccount(type, raw) {
       if (this.$refs.Form) {
         this.$refs.Form.clearValidate();
@@ -411,12 +444,23 @@ export default {
         this.upShow = false
         this.envShow = true
         this.up_isdisabled = false
-      } else {
-        this.title = "增加下级模块";
+      } else if(type == 2){
+        this.title = "增加二级模块";
         this.addAccountdialog = true;
         this.Form.type = 2;
         this.Form.project_id = raw.project_id
-        this.envShow = false
+        this.envShow = true
+        this.Form.up_id = raw.id
+        this.upShow = true
+        this.isdisabled = true
+        this.up_isdisabled = true
+      }
+      else{
+        this.title = "增加三级模块";
+        this.addAccountdialog = true;
+        this.Form.type = 3;
+        this.Form.project_id = raw.project_id
+        this.envShow = true
         this.Form.up_id = raw.id
         this.upShow = true
         this.isdisabled = true
@@ -436,12 +480,17 @@ export default {
         this.upShow = false
         this.isdisabled = false
       } else if (raw.type == 2) {
-        this.envShow = false
+        this.envShow = true
+        this.upShow = true
+        this.isdisabled = true
+      }else{
+        this.envShow = true
         this.upShow = true
         this.isdisabled = true
       }
     },
     creOrupAccount(Form) {
+      console.log(this.Form)
       this.$refs[Form].validate((valid) => {
         if (valid) {
           if (this.title == '新增模块') {
@@ -462,12 +511,11 @@ export default {
                     this.$message.error(res.data.msg);
                   }
                 })
-                .catch((error) => {
+                .catch(() => {
                   this.is_data = false;
-                  console.log(error); //  错误处理 相当于error
                   this.$message.error("服务器错误,请联系测试人员");
                 });
-          } else if (this.title == '增加下级模块') {
+          } else if (this.title == '增加二级模块' || this.title == '增加三级模块') {
             axios
                 .post("/api/test_management/createModule", this.Form)
                 .then((res) => {
@@ -485,9 +533,8 @@ export default {
                     this.$message.error(res.data.msg);
                   }
                 })
-                .catch((error) => {
+                .catch(() => {
                   this.is_data = false;
-                  console.log(error); //  错误处理 相当于error
                   this.$message.error("服务器错误,请联系测试人员");
                 });
           } else if (this.title == '编辑模块') {
@@ -508,9 +555,8 @@ export default {
                     this.$message.error(res.data.msg);
                   }
                 })
-                .catch((error) => {
+                .catch(() => {
                   this.is_data = false;
-                  console.log(error); //  错误处理 相当于error
                   this.$message.error("服务器错误,请联系测试人员");
                 });
           }
@@ -537,9 +583,8 @@ export default {
               this.$message.error(res.data.msg);
             }
           })
-          .catch((error) => {
+          .catch(() => {
             this.is_data = false;
-            console.log(error); //  错误处理 相当于error
             this.$message.error("服务器错误,请联系测试人员");
           });
     },
@@ -547,8 +592,10 @@ export default {
       let val = null;
       if (raw.type == 1) {
         val = '一级模块'
-      } else {
+      } else if(raw.type == 2){
         val = '二级模块'
+      }else{
+        val = '三级模块'
       }
       return val
     },
@@ -564,9 +611,8 @@ export default {
               this.$message.error(res.data.msg);
             }
           })
-          .catch((error) => {
+          .catch(() => {
             this.is_data = false;
-            console.log(error); //  错误处理 相当于error
             this.$message.error("服务器错误,请联系测试人员");
           });
     },
@@ -587,7 +633,6 @@ export default {
       return val
     },
     get_dingding_woman_master(raw) {
-      console.log(raw)
       let val = null;
       this.mail_list.forEach((item) => {
         if (raw.master == item.id) {
@@ -597,7 +642,6 @@ export default {
       return val
     },
     get_dingding_woman_dev_master(raw) {
-      console.log(raw)
       let val = null;
       this.mail_list.forEach((item) => {
         if (raw.dev_master == item.id) {
@@ -609,7 +653,6 @@ export default {
     get_env_name(raw) {
       let val = null;
       this.env.forEach((item) => {
-        console.log(item, raw)
         if (raw.env == item.value) {
           val = item.label
         }

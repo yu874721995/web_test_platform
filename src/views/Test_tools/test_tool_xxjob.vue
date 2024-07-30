@@ -103,7 +103,7 @@
               width="200"
             >
             <template slot-scope="scope">
-                  <el-link target="_blank" type="primary" v-bind:href="'http://xxljob-'+format_env(scope.row.env)+'.nextop.cc/xxl-job-admin/joblog?jobId='+scope.row.job_id">{{ scope.row.job_name }}</el-link>
+                  <el-link target="_blank" type="primary" v-bind:href="'http://xxl-job-admin.erp-'+format_env(scope.row.env)+'.yintaerp.com/xxl-job-admin/joblog?jobId='+scope.row.job_id">{{ scope.row.job_name }}</el-link>
                 </template>
               </el-table-column>
 
@@ -148,7 +148,7 @@
                   @click="build_job(scope.row)"
                   type="text"
                   size="small"
-                  v-has="{class:'99'}"
+                  v-has="{class:'55'}"
                   >执行一次</el-button
                 >
               </template>
@@ -279,9 +279,9 @@ export default {
     format_env(env){
       let envVal = '';
       if(env==1){
-        envVal = 'test'
+        envVal = 'sit'
       }else{
-        envVal = 'pre'
+        envVal = 'uat'
       }
       return envVal
     },

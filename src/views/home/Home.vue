@@ -15,12 +15,13 @@
         <!--start顶部bug-总数div-->
         <div style="border: none;box-shadow: var(--box-shadow-base,0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px 0 rgba(0,0,0,.06));
           border-radius: 4px;float: left;width: 24%;margin-top: 20px;height: 120px;margin-left: 1%;background: #FFFFFF">
-          <div style="margin-left: 16px;margin-top: 16px;float: left;"><a style="font-size: 13px;color: #6B7280;">迭代bug总数</a>
+          <div style="margin-left: 16px;margin-top: 16px;float: left;"><a style="font-size: 13px;color: #6B7280;">未解决bug数</a>
           </div>
-          <div style="margin-left: 2px;margin-top: 18px;float: left;"><img src="./statc/help.png"
-                                                                           style="width: 20px;height: 20px;"></div>
-          <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
-                                                                              style="width: 20px;height: 20px;"></div>
+          <div style="margin-left: 2px;margin-top: 18px;float: left;">
+            <el-tooltip class="item" effect="dark" content="未解决的bug数量" placement="top-start">
+              <img src="./statc/help.png" style="width: 20px;height: 20px;"></el-tooltip></div>
+          <!-- <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
+                                                                              style="width: 20px;height: 20px;"></div> -->
 
 
           <div style="margin-left: 16px;font-size: 20px;color: black;width: 95%;float: left;">
@@ -33,7 +34,7 @@
           </div>
 
           <div style="margin-left: 16px;float: left;margin-top: 5px;">
-            <el-link :href="this.bug_href"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
+            <el-link @click="bug_risk_dialog_template('bug_no_num')"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
               {{ bug_ratio }}%</a></el-link>
           </div>
 
@@ -47,14 +48,14 @@
           <div style="margin-left: 16px;margin-top: 16px;float: left;"><a
               style="font-size: 13px;color: #6B7280;">level</a>
           </div>
-          <div style="margin-left: 2px;margin-top: 18px;float: left;"><img src="./statc/help.png"
-                                                                           style="width: 20px;height: 20px;"></div>
-          <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
-                                                                              style="width: 20px;height: 20px;"></div>
+          <div style="margin-left: 2px;margin-top: 18px;float: left;"><el-tooltip class="item" effect="dark" content="严重及以上程度的缺陷，点击红色字体可查看详情" placement="top-start">
+              <img src="./statc/help.png" style="width: 20px;height: 20px;"></el-tooltip></div>
+          <!-- <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
+                                                                              style="width: 20px;height: 20px;"></div> -->
 
 
           <div style="margin-left: 16px;font-size: 20px;color: black;width: 95%;float: left;">
-            <b>{{ bug_high_num }}</b><a style="font-size: 10px"> 高</a>
+            <b>{{ bug_high_num }}</b><a style="font-size: 10px"> 严重及以上</a>
           </div>
           <div style="margin-left: 16px;height: 4px;width: 90%;margin-top: 10px; float: left;">
             <el-progress :percentage="bug_level_ratio" :show-text="false"
@@ -62,7 +63,7 @@
           </div>
 
           <div style="margin-left: 16px;float: left;margin-top: 5px;">
-            <el-link :href="this.bug_level_href"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
+            <el-link @click="bug_risk_dialog_template('bug_all_level_num')"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
               {{ bug_level_ratio }}%</a></el-link>
           </div>
 
@@ -77,10 +78,10 @@
           <div style="margin-left: 16px;margin-top: 16px;float: left;"><a
               style="font-size: 13px;color: #6B7280;">reopen</a>
           </div>
-          <div style="margin-left: 2px;margin-top: 18px;float: left;"><img src="./statc/help.png"
-                                                                           style="width: 20px;height: 20px;"></div>
-          <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
-                                                                              style="width: 20px;height: 20px;"></div>
+          <div style="margin-left: 2px;margin-top: 18px;float: left;"><el-tooltip class="item" effect="dark" content="重复修改，再次打开的bug数量，点击红色字体可查看详情" placement="top-start">
+              <img src="./statc/help.png" style="width: 20px;height: 20px;"></el-tooltip></div>
+          <!-- <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
+                                                                              style="width: 20px;height: 20px;"></div> -->
 
 
           <div style="margin-left: 16px;font-size: 20px;color: black;width: 95%;float: left;">
@@ -92,7 +93,7 @@
           </div>
 
           <div style="margin-left: 16px;float: left;margin-top: 5px;">
-            <el-link :href="this.bug_href"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
+            <el-link @click="bug_risk_dialog_template('bug_rerun_count')"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
               {{ bug_reopen_ratio }}%</a></el-link>
           </div>
 
@@ -106,10 +107,10 @@
           <div style="margin-left: 16px;margin-top: 16px;float: left;"><a
               style="font-size: 13px;color: #6B7280;">延期bug</a>
           </div>
-          <div style="margin-left: 2px;margin-top: 18px;float: left;"><img src="./statc/help.png"
-                                                                           style="width: 20px;height: 20px;"></div>
-          <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
-                                                                              style="width: 20px;height: 20px;"></div>
+          <div style="margin-left: 2px;margin-top: 18px;float: left;"><el-tooltip class="item" effect="dark" content="延期解决的bug数量：其中一般bug为24小时，严重以上的bug为4小时" placement="top-start">
+              <img src="./statc/help.png" style="width: 20px;height: 20px;"></el-tooltip></div>
+          <!-- <div style="margin-right: 16px;margin-top: 18px;float: right;"><img src="./statc/to.png"
+                                                                              style="width: 20px;height: 20px;"></div> -->
 
 
           <div style="margin-left: 16px;width: 95%;float: left;">
@@ -122,7 +123,7 @@
           </div>
 
           <div style="margin-left: 16px;float: left;margin-top: 5px;">
-            <el-link :href="this.bug_href"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
+            <el-link @click="bug_risk_dialog_template('yanqi_num_proportion')"><a style="font-size: 12px;color: #EF4444;">共{{ bug_total_num }}个bug 占比
               {{ bug_rerun_ratio }}%</a></el-link>
           </div>
 
@@ -142,8 +143,8 @@
             padding: 5px 10px 5px 10px; height: 20px;">{{ convergence_risk }}</b>
           </div>
 
-          <div style="margin-right: 3%;margin-top: 3%;float: right;"><img src="./statc/to.png"
-                                                                          style="width: 20px;height: 20px;"></div>
+          <!-- <div style="margin-right: 3%;margin-top: 3%;float: right;"><img src="./statc/to.png"
+                                                                          style="width: 20px;height: 20px;"></div> -->
 
           <div><img src="./statc/no_data.png"
                     style="width: 170px;height: 170px;float: left;margin-left: 37%;margin-top: 20%"
@@ -211,6 +212,7 @@
 
 
         </div>
+        <bug_risk_dialog_template v-if="bug_risk_dialog_template_display" @diaolog_colse="bug_risk_dialog_template_display=false" ref="bug_risk_dialog_template"></bug_risk_dialog_template>
 
         <!--第四个图表-->
         <div style="width: 98%;height: 470px;background: #FFFFFF;border-radius: 4px; margin-top: 20px; margin-left: 1%;
@@ -237,9 +239,13 @@
 <script>
 import * as echarts from "echarts";
 import axios from "axios";
+import bug_risk_dialog_template from '../project_manage/Tapd_test_risk.vue';
 
 export default {
   name: "home",
+  components:{
+    bug_risk_dialog_template
+  },
 
   data() {
     return {
@@ -290,6 +296,8 @@ export default {
       progress_is_show: true,
       block_have_data: false,
       block_is_show: true,
+      bug_risk_dialog_template_display:false,
+      now_iter_row:{},
     }
   },
   mounted() {
@@ -344,6 +352,13 @@ export default {
             if (res.data['code'] === 10000) {
               this.all_data = res.data.data;
               this.all_data.forEach((item) => {
+                console.log(iteration_id,item.iteration_id)
+                if(iteration_id == 999999999){
+                  this.now_iter_row = res.data.data[0]
+                }
+                if(item.plant_id == iteration_id){
+                  this.now_iter_row = item
+                }
                 this.y_diedai_name.push(item.iteration_name);
                 this.y_block_time.push(item.before_block_time);
                 this.x_date_start_time2 = this.x_date_start_time1.map((item) => {
@@ -515,7 +530,8 @@ export default {
               duration = endTime - baseTime;
             }
             //数据长度-对应时间
-          } else if (typeItem.name === "剩余时间") {
+          }
+           else if (typeItem.name === "剩余时间") {
             if (endTime <= new Date()) {
               continue;
             }
@@ -524,10 +540,14 @@ export default {
             if (new Date() <= endTime) {
               continue;
             }
+            if(parseInt(category.plant_time) > 0 || !parseInt(category.plant_time)){
+              continue
+            }
             duration = new Date() - endTime; //数据长度-对应时间
           }
           data.push({
             name: typeItem.name,
+            plant_time:category.plant_time,
             value: [index, baseTime, (baseTime += duration), duration],
             itemStyle: {
               normal: {
@@ -572,8 +592,15 @@ export default {
       option = {
         tooltip: {
           formatter: function (params) {
-            // console.log(params)
-            return params.data.diedai_name +  params.marker + params.name + ': ' + Math.ceil(params.value[3] / (1000 * 60 * 60 * 24)) + ' 天';
+            if(parseInt(params.data.plant_time)){
+              if(parseInt(params.data.plant_time) > 0){
+                return params.data.diedai_name +  params.marker + '剩余测试时间：' + params.data.plant_time + '天';
+              }else{
+                return params.data.diedai_name +  params.marker + '逾期时间：' + Math.abs(params.data.plant_time) + '天';
+              }
+            }else{
+              return params.data.diedai_name +  params.marker + params.data.plant_time;
+            }
           }
         },
         legend: {
@@ -731,6 +758,14 @@ export default {
           this.risk_have_data = false;
         })
       }
+    },
+    bug_risk_dialog_template(type){
+      this.bug_risk_dialog_template_display = true;
+      this.$nextTick(()=>{
+        console.log(this.now_iter_row)
+        this.$refs.bug_risk_dialog_template.openDetail(this.now_iter_row,type)
+      })
+      console.log(111);
     },
 
     //用例执行进度

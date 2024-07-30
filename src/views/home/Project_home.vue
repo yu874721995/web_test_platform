@@ -19,7 +19,7 @@
               type="primary"
               style="background-color: #3573fe"
               @click="addproject"
-              v-has="{class:'87'}"
+              v-has="{class:'43'}"
           >新增
           </el-button>
       </div>
@@ -49,19 +49,48 @@
                 prop="project_name"
                 label="项目名称"
                 align="center"
-                width="300"
+                width="150"
             >
             </el-table-column>
             <el-table-column
                 prop="host"
-                label="项目host"
+                label="项目标识"
                 align="center"
-                width="350"
+                width="150"
             >
             </el-table-column>
             <el-table-column
                 prop="remark"
                 label="项目描述"
+                align="center"
+                width="150"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="interFaceNum"
+                label="接口数量"
+                align="center"
+                width="100"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="caseNum"
+                label="用例数量"
+                align="center"
+                width="100"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="isNum"
+                :formatter="isNum_format"
+                label="接口覆盖率"
+                align="center"
+                width="100"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="principal_name"
+                label="项目负责人"
                 align="center"
                 width="400"
             >
@@ -92,7 +121,7 @@
                     @click="putproject(scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'89'}"
+                    v-has="{class:'45'}"
                 >编辑
                 </el-button
                 >
@@ -138,10 +167,10 @@
                 placeholder="请输入项目名称"
             ></el-input>
           </el-form-item>
-          <el-form-item label="host" prop="host">
+          <el-form-item label="标识" prop="host">
             <el-input
                 v-model="Form.host"
-                placeholder="请输入host"
+                placeholder="请输入标识"
             ></el-input>
           </el-form-item>
           <el-form-item label="项目描述" prop="remark">
@@ -149,6 +178,16 @@
                 v-model="Form.remark"
                 placeholder="请输入项目描述"
             ></el-input>
+          </el-form-item>
+          <el-form-item label="项目负责人" prop="principal_code">
+            <el-select v-model="Form.principal_code" clearable filterable style="width: 150px;">
+              <el-option
+                  v-for="item in dingUser_list"
+                  :key="item.id"
+                  :label="item.principal_name"
+                  :value="item.principal_code"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="creOrupPro('Form')">确定</el-button>
@@ -179,6 +218,7 @@ export default {
         type: 1
       },
       //是否有数据
+      dingUser_list:[],
       is_data: false,
       //新增项目的显示
       addprojectdialog: false,
@@ -189,7 +229,7 @@ export default {
       title: '新增项目',
       rules: {
         project_name: [{required: true, message: "请填写项目名称", trigger: "blur"}],
-        host: [{required: true, message: "请填写项目host", trigger: "blur"}],
+        host: [{required: true, message: "请填写项目标识", trigger: "blur"}],
       },
     };
   },
@@ -203,7 +243,7 @@ export default {
     getList() {
       //通过pageSC做查询
       axios
-          .post("/api/test_management/proList", this.pageSC)
+          .post("/api/test_management/proManageList", this.pageSC)
           .then((res) => {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
@@ -219,6 +259,22 @@ export default {
           .catch((error) => {
             this.is_data = false;
             console.log(error); //  错误处理 相当于error
+            this.$message.error("服务器错误,请联系测试人员");
+          });
+    },
+    //项目负责人下拉框数据
+    get_dingUser_list() {
+      axios
+          .post("/api/test_management/dingUserlist", {})
+          .then((res) => {
+            //api接口判断为code=10000成功
+            if (res.data["code"] === 10000) {
+              this.dingUser_list = res.data["data"];
+              this.principal_name = this.dingUser_list.principal_name;
+            }
+          })
+          .catch(() => {
+            this.is_data = false;
             this.$message.error("服务器错误,请联系测试人员");
           });
     },
@@ -241,6 +297,7 @@ export default {
       this.Form = {
         "type": 1
       };
+      delete this.Form.principal_name;
       this.addprojectdialog = true;
     },
     //编辑项目
@@ -251,7 +308,11 @@ export default {
       this.title = "编辑项目";
       this.Form = JSON.parse(JSON.stringify(raw));
       this.Form.type = 2;
+      delete this.Form.principal_name;
       this.addprojectdialog = true;
+    },
+    isNum_format(raw){
+      return String(raw.isNum) + '%'
     },
     creOrupPro(Form) {
       this.$refs[Form].validate((valid) => {
@@ -283,12 +344,21 @@ export default {
         }
       })
     },
-
+    get_principal_name(raw){
+      let val = null;
+      this.dingUser_list.forEach((item)=>{
+        if(raw.principal_code === item.principal_code){
+          val = item.principal_code
+        }
+      })
+      return val
+    },
   },
   //页面初始化渲染
   created() {
     this.initVue();
     this.getList();
+    this.get_dingUser_list();
   },
 };
 </script>

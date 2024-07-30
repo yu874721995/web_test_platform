@@ -28,7 +28,7 @@ const Api = {
     },
     get_case_list:(data) => {
         return request({
-            url:'api/api_case/case/page',
+            url:'api/test_case/CaseList',
             method:"post",
             data:data
         })

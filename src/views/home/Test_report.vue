@@ -39,27 +39,41 @@
           :border="true"
           type="selection"
       >
-        <el-table-column prop="report_name" label="测试名称" align="center" width="250"></el-table-column>
-        <el-table-column prop="case_num" label="总用例数" align="center" width="120"></el-table-column>
+        <el-table-column prop="name" label="测试名称" align="center" width="300"></el-table-column>
+        <el-table-column prop="case_num" label="总用例数" align="center" width="150"></el-table-column>
         <el-table-column prop="pass_num" label="成功用例数" align="center" width="150"></el-table-column>
-        <el-table-column prop="updated_time" label="执行完成时间" align="center" width="200"></el-table-column>
         <el-table-column prop="lose_num" label="失败用例数" align="center" width="150"></el-table-column>
-        <el-table-column prop="elapsed" label="执行耗时" align="center" width="200"></el-table-column>
+        <el-table-column prop="pass_rate" label="通过率" align="center" width="100"></el-table-column>
+        <el-table-column prop="updated_time" label="执行开始时间" align="center" width="250"></el-table-column>
+        <el-table-column prop="elapsed" label="执行耗时(秒)" align="center" width="150"></el-table-column>
         <el-table-column prop="run_user_nickname" label="执行人" align="center" width="150"></el-table-column>
-        <el-table-column prop="report_name" label="测试报告地址" align="center" width="300">
+        <!-- <el-table-column prop="report_name" label="测试报告地址" align="center" width="400">
           <template slot-scope="scope">
             <button @click="report_details(scope.row)"
                     style="background-color: transparent;border:0;font-size: 10px;color: #409EFF">
               {{ scope.row.report_name }}
             </button>
           </template>
-        </el-table-column>
-        <el-table-column style="background-color: #ffffff" fixed="right" label="操作" width="150" align="center">
+        </el-table-column> -->
+
+        <el-table-column label="测试报告地址" align="center" width="250" 
+            ><template slot-scope="scope"
+              ><el-link 
+                v-if="scope.row.report_status === 1"
+                type="primary"
+                target="_blank"
+                @click="reportView(scope.row.id)"
+                >查看报告</el-link
+              ></template
+            ></el-table-column
+          >
+
+        <!-- <el-table-column style="background-color: #ffffff" fixed="right" label="操作" width="150" align="center">
           <template slot-scope="scope">
             <el-button @click="re_execute(scope.row)" type="text" size="small">重新执行</el-button>
             <el-button @click="send_ding(scope.row)" type="text" size="small">发送钉钉</el-button>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </div>
     <!--表格end-->
@@ -177,12 +191,37 @@ export default {
   methods: {
     get_report_list() {
       axios
-          .get("/api/api_case/report", {params: this.pageSC})
+          .post("/api/test_case/ReportList",this.pageSC)
           .then((res) => {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
-              this.report_data = res.data.data
-              this.total = res.data.totalNum
+              res.data.data.forEach((item)=>{
+              if (item.case_num===null){item.pass_rate="";}
+              else
+              {item.pass_rate =((item.pass_num/item.case_num)*100).toFixed(1)+"%";}
+              this.report_data.push(item);
+              });
+              this.report_data = res.data.data;
+              this.total = res.data.totalNum;
+            } else {
+              //失败提示
+              this.$message.error(res.data.msg);
+            }
+          })
+          .catch((error) => {
+            this.is_data = false;
+            console.log(error); //  错误处理 相当于error
+            this.$message.error("服务器错误,请联系测试人员");
+          });
+    },
+    reportView(reportId){
+      axios
+          .post("/api/test_case/reportView",{reportId:reportId})
+          .then((res) => {
+            //api接口判断为code=10000成功
+            if (res.data["code"] === 10000) {
+              this.report_url = res.data.report_url
+              window.open('http://test-platform.sit.yintaerp.com'+this.report_url)
             } else {
               //失败提示
               this.$message.error(res.data.msg);
@@ -202,7 +241,7 @@ export default {
           .then((res) => {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
-              this.report_title = res.data.data['report_name'] + " 耗时：" + res.data.data['elapsed'] + " 结果" + res.data.data['result'];
+              this.report_title = res.data.data['name'] + " 耗时：" + res.data.data['elapsed'] + " 结果" + res.data.data['result'];
               if (res.data.data['case_group_id'].length !== 0) {
                 this.report_group_detail_arr = res.data.data['case_group_result'];
                 for (let i = 0; i < res.data.data['case_group_result'].length; i++) {

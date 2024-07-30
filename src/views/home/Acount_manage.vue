@@ -24,28 +24,20 @@
           <el-select v-model="list_page_body.env" placeholder="请选择所属环境" clearable filterable
                      style="width: 150px; margin-left: 10px">
             <el-option
-                v-for="item in env"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+
+                v-for="item in envs"
+                :key="item.id"
+                :label="item.env_name"
+                :value="item.id"
             ></el-option>
           </el-select>
         </div>
 
         <div style="float: left; margin-left: 10px">
-          <a style="font-size: 13px">手机号码</a>
-          <el-input
-              placeholder="请输入手机号码"
-              v-model="list_page_body.account"
-              style="width: 150px; margin-left: 10px"
-              class="case_input"
-          ></el-input>
-        </div>
 
-        <div style="float: left; margin-left: 10px">
           <a style="font-size: 13px">账号描述</a>
           <el-input
-              placeholder="请输入手机号码"
+              placeholder="请输入账号描述"
               v-model="list_page_body.account_name"
               style="width: 150px; margin-left: 10px"
               class="case_input"
@@ -91,7 +83,7 @@
                   type="primary"
                   style="background-color: #3573fe"
                   @click="addAccount"
-                  v-has="{class:'100'}"
+                  v-has="{class:'56'}"
               >新增
               </el-button>
             </el-row>
@@ -145,17 +137,13 @@
             >
             </el-table-column>
             <el-table-column
-                prop="account"
-                label="手机号码"
+
+                :formatter="get_login_env"
+                prop="config_id"
+                label="使用配置"
+
                 align="center"
                 width="200"
-            >
-            </el-table-column>
-            <el-table-column
-                prop="cookie"
-                label="cookie"
-                align="center"
-                width="300"
             >
             </el-table-column>
             <el-table-column
@@ -184,7 +172,7 @@
                     @click="putAccount(scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'101'}"
+                    v-has="{class:'57'}"
                 >编辑
                 </el-button
                 >
@@ -192,7 +180,7 @@
                     @click="delAccount(scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'102'}"
+                    v-has="{class:'58'}"
                 >删除
                 </el-button
                 >
@@ -252,41 +240,33 @@
           <el-form-item label="所属环境" prop="env">
             <el-select v-model="Form.env" clearable filterable style="width: 150px;">
               <el-option
-                  v-for="item in env"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in envs"
+                  :key="item.id"
+                  :label="item.env_name"
+                  :value="item.id"
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="登录账号" prop="account">
-            <el-input
-                v-model="Form.account"
-                placeholder="请输入登录账号"
-            ></el-input>
-          </el-form-item>
-          <el-form-item label="登录密码" prop="password">
-            <el-input
-                v-model="Form.password"
-                placeholder="请输入登录密码"
-            ></el-input>
-          </el-form-item>
-          <el-form-item label="默认租户" prop="tenantId">
-            <el-select
-                v-model="Form.tenantId"
-                clearable filterable
-                placeholder="请选择租户"
-                style="width: 150px;"
-                @focus="update_tenantList('Form')"
-            >
+
+          <el-form-item label="使用配置" prop="config_id">
+            <el-select v-model="Form.config_id" @change = "changeEvent" clearable filterable style="width: 150px;">
               <el-option
-                  v-for="item in tenant"
-                  :key="item.tenantId"
-                  :label="item.tenantName"
-                  :value="item.tenantId"
+                  v-for="item in loginEnvList"
+                  :key="item.id"
+                  :label="item.remark"
+                  :value="item.id"
               ></el-option>
             </el-select>
           </el-form-item>
+
+          <el-form-item
+            v-for="(domain) in Form.domains"
+            :label="domain.key"
+            :key = "domain.key"
+            :prop="domain.key"
+          ><el-input v-model="domain.value" @input="changeValue"></el-input>
+        </el-form-item>
+          
           <el-form-item>
             <el-button type="primary" @click="creOrupAccount('Form')">确定</el-button>
             <el-button @click="addAccountdialog=false">取消</el-button>
@@ -311,29 +291,19 @@ export default {
         page: 1,
         limit: 20,
       },
-      env: [
-        {
-          value: "daily",
-          label: "联调环境",
-        },
-        {
-          value: "nextop-pre",
-          label: "预发环境",
-        },
-        {
-          value: "nextop-prod",
-          label: "生产环境",
-        }
-      ],
+
       Form: {
-        type: 1
+        type: 1,
+        config_json:[],
+        domains:[],
+        creator:localStorage.getItem('username')
       },
       rules: {
         project_id: [{required: true, message: "请选择项目", trigger: "blur"}],
         account_name: [{required: true, message: "请输入账号名称", trigger: "blur"}],
         env: [{required: true, message: "请选择所属环境", trigger: "blur"}],
-        account: [{required: true, message: "请输入登录账号", trigger: "blur"}],
-        password: [{required: true, message: "请输入登录密码", trigger: "blur"}],
+
+        config_id: [{required: true, message: "请选择登录配置", trigger: "blur"}],
       },
       //是否有数据
       is_data: false,
@@ -343,7 +313,13 @@ export default {
       //表格
       project_data: [],
       tenant: [],
+
+      req_config_json:{},
       project: [],
+      loginEnvList:[],
+      login_data:null,
+      envs:[],
+      domain:[],
       //总条数
       total: 0,
       title: '新增账号',
@@ -394,18 +370,32 @@ export default {
       }
       this.title = "新增账号";
       this.addAccountdialog = true;
-      this.Form = {}
+      this.Form={
+        type: 1,
+        config_json:{},
+        domains:[],
+        creator:localStorage.getItem('username')
+      },
       this.tenant = []
     },
-    //编辑项目
+    //编辑账号
     putAccount(raw) {
       if (this.$refs.Form) {
         this.$refs.Form.clearValidate();
       }
       this.title = "编辑账号";
-      this.tenant = raw.tenant;
       this.Form = JSON.parse(JSON.stringify(raw));
+      this.Form.domains = []
+      var dict = eval('(' + raw.body.replace(/None/g,'null').replace(/False/g,'false') + ')');
+      for(var key in dict){
+        this.Form.domains.push({
+          'key':key,'value':dict[key]
+        })
+      }
+      this.req_config_json = eval('(' + raw.config_json.replace(/None/g,'null').replace(/False/g,'false') + ')');
       this.addAccountdialog = true;
+
+      
     },
     update_tenantList(Form) {
       this.$refs[Form].validate((valid) => {
@@ -437,6 +427,12 @@ export default {
     creOrupAccount(Form) {
       this.$refs[Form].validate((valid) => {
         if (valid) {
+            var dict = {}
+            this.Form.domains.forEach((item)=>{
+              dict[item.key] = item.value
+            })
+            this.req_config_json.login_body = dict
+            this.Form.config_json = this.req_config_json
           if (this.title == '新增账号') {
             axios
                 .post("/api/test_management/createAccount", this.Form)
@@ -540,16 +536,78 @@ export default {
       })
       return val
     },
-    get_env_name(raw) {
+    get_login_config(){
+      axios
+          .post("/api/test_management/loginEnvList", this.list_page_body)
+          .then((res) => {
+            //api接口判断为code=10000成功
+            if (res.data["code"] === 10000) {
+              this.loginEnvList = res.data.items
+            } else {
+              //失败提示
+              this.$message.error(res.data.msg);
+            }
+          })
+          .catch((error) => {
+            this.is_data = false;
+            console.log(error); //  错误处理 相当于error
+            this.$message.error("服务器错误,请联系测试人员");
+          });
+    },
+    get_login_env(raw){
       let val = null;
-      this.env.forEach((item) => {
-        console.log(item, raw)
-        if (raw.env == item.value) {
-          val = item.label
+      this.loginEnvList.forEach((item) => {
+        if (raw.config_id == item.id) {
+          val = item.remark
         }
       })
       return val
     },
+    get_env(){
+      axios
+          .post("/api/test_management/envlist", {limit:1000,page:1})
+          .then((res) => {
+            //api接口判断为code=10000成功
+            if (res.data["code"] === 10000) {
+              this.envs = res.data.items
+            } else {
+              //失败提示
+              this.$message.error(res.data.msg);
+            }
+          })
+          .catch((error) => {
+            this.is_data = false;
+            console.log(error); //  错误处理 相当于error
+            this.$message.error("服务器错误,请联系测试人员");
+          });
+    },
+    get_env_name(raw) {
+      let val = null;
+      this.envs.forEach((item) => {
+        if (raw.env == item.id) {
+          val = item.env_name
+        }
+      })
+      return val
+    },
+    changeEvent(val){
+      this.Form.domains = [];
+      this.loginEnvList.forEach((item)=>{
+        if(item.id == val){
+          this.login_data =  JSON.parse(item.ext).login_body
+          this.req_config_json = JSON.parse(item.ext)
+        }
+      })
+      for(var key in this.login_data){
+          this.Form.domains.push({
+            'value':this.login_data[key],
+            'key':key
+          })
+      }
+    },
+    changeValue () {
+      this.$forceUpdate()
+    }
 
   },
 
@@ -558,6 +616,9 @@ export default {
     this.initVue();
     this.getList();
     this.get_project();
+
+    this.get_env();
+    this.get_login_config();
   },
 };
 </script>

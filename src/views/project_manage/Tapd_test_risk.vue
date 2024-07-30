@@ -49,7 +49,7 @@
               size="small"
               style="background-color: #3573fe"
               @click="update_now"
-              v-has="{class:'85'}"
+              v-has="{class:'41'}"
             >
               立即更新
             </el-button>
@@ -281,7 +281,7 @@
                     @click="openDetail(scope.row, 'view')"
                     type="text"
                     size="small"
-                    v-has="{class:'86'}"
+                    v-has="{class:'42'}"
                 >查看详情
                 </el-button>
               </template>
@@ -484,11 +484,18 @@ export default {
   components: { Breadcrumb },
   data() {
     return {
+      // bug_level:{
+      //   'serious':'严重',
+      //   'prompt':'提示',
+      //   'normal':'一般',
+      //   'fatal':'致命',
+      //   'advice':'建议'
+      // },
       bug_level:{
-        'serious':'严重',
-        'prompt':'提示',
-        'normal':'一般',
-        'fatal':'致命',
+        '3f3524330948ed411c957a4f09':'严重',
+        '11a0f6b6ea494497215ed496d4':'提示',
+        '458efb683d26901672f6496c8c':'一般',
+        '80ee1f6029fc1efcc9dae9f3b5':'致命',
         'advice':'建议'
       },
       //分页请求数据
@@ -518,9 +525,13 @@ export default {
     };
   },
   methods: {
+    formdialogclosed(){
+      this.dialogVisible = false;
+      this.$emit('diaolog_colse')
+    },
     //字段数据format
     rerun_bug_num(row){
-      return String(this.bug_rerun_detail[row.bug_id]) + '次'
+      return String(this.bug_rerun_detail[row.bug_all_id]) + '次'
     },
     
     case_owner(row){
@@ -560,7 +571,7 @@ export default {
     yanqi_ok_time(row){
       let val = ''
       this.yanqi_bug_times.forEach((item)=>{
-        if(item.bug_id == row.bug_id){
+        if(item.bug_id == row.bug_all_id){
           console.log(item.bug_id,row.bug_id)
           val = String(parseInt(item.yanqi_times * 100) / 100) + '小时'
           }
@@ -600,6 +611,9 @@ export default {
       return String(val.test_pass) + "%";
     },
     plant_time_format(val) {
+      if(!parseInt(val.plant_time)){
+        return val.plant_time
+      }
       return val.plant_time >= 0
         ? "剩余" + String(val.plant_time) + "天"
         : "已过期" + String(Math.abs(val.plant_time)) + "天";
@@ -612,7 +626,7 @@ export default {
       this.risk_data = row.riskData
       this.convergence_data = row.convergence_risk_data
       axios
-        .post("/api/test_tapd/plant_detail",{'plant_id':row.plant_id})
+        .post("/api/test_tapd/plant_detail",{'iteration_id':row.iteration_id,'plant_id':row.plant_id})
         .then((res) => {
           //api接口判断为code=10000成功
           if (res.data["code"] === 10000) {

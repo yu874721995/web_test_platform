@@ -16,6 +16,7 @@ import Role_auth from '../views/home/Role_auth.vue'
 import Mitmproxy_case from '../views/home/Mitmproxy_case.vue'
 import Swagger_api from '@/views/home/Swagger_api.vue'
 import Swagger_api_new from '@/views/home/Swagger_api_new.vue'
+import dubbo_mananger from '@/views/home/dubbo_manage.vue'
 import ElementUI from 'element-ui'
 import Tapd_Project_home from '../views/project_manage/Project_manage.vue'
 import Tapd_Projects from '../views/project_manage/Project_home.vue'
@@ -24,12 +25,18 @@ import Tapd_demand_middle_config from '../views/project_manage/Tapd_demand_middl
 import system_manage from '@/views/home/systemConf.vue'
 import Tapd_test_risk from '../views/project_manage/Tapd_test_risk.vue'
 import 'element-ui/lib/theme-chalk/index.css'
-import test_tool_bkci from '../views/Test_tools/test_tool_bkci.vue'
+import test_tool_bkci from '../views/Test_tools/test_tool_bkci_new.vue'
 import test_tool_xxjob from '../views/Test_tools/test_tool_xxjob.vue'
+import test_tool_all from '../views/Test_tools/test_tool_all.vue'
+import test_tool_sql_data from '../views/Test_tools/test_tool_sql_data.vue'
 import test_tools_manage from '../views/Test_tools/test_tools_manage.vue'
 import jursidiction_manage from '@/views/home/jursidiction_manage.vue'
+import interfaceConfig from '../views/home/InterFaceConfig.vue'
+import mock_data from '../views/home/mockDetail.vue'
 import axios from 'axios'
 import store from '../store/index'
+import Env_Navigations_manage from '../views/Env_Navigations/Env_Navigations_manage.vue'
+import Env_Navigation from '../views/Env_Navigations/Env_Navigation.vue'
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
@@ -85,7 +92,7 @@ const routes = [
             {
                 path: '/test_tool_bkci',
                 name: 'test_tool_bkci',
-                meta: { "title": "蓝盾构建工具" },
+                meta: { "title": "Jenkins构建工具" },
                 component: test_tool_bkci
             },
             {
@@ -93,6 +100,24 @@ const routes = [
                 name: 'test_tool_xxjob',
                 meta: { "title": "xxjob-执行工具" },
                 component: test_tool_xxjob
+            },
+            {
+                path: '/test_tool_all',
+                name: 'test_tool_all',
+                meta: { "title": "其他测试工具" },
+                component: test_tool_all
+            },
+            {
+                path: '/test_tool_sql_data',
+                name: 'test_tool_sql_data',
+                meta: { "title": "数据对比" },
+                component: test_tool_sql_data
+            },
+            {
+              path: '/mock_data',
+              name: 'mock_data',
+              meta: { "title": "mock数据" },
+              component: mock_data
             },
         ]
     },
@@ -104,7 +129,7 @@ const routes = [
             {
                 path: '/Home',
                 name: 'Home',
-                meta: { "title": "Nextop-Test-Platform" },
+                meta: { "title": "YinTa-Test-Platform" },
                 component: Home
             },
             {
@@ -162,6 +187,18 @@ const routes = [
                 component: Swagger_api
             },
             {
+                path: '/dubbo_mananger',
+                name: 'dubbo_mananger',
+                meta: { "title": "dubbo接口" },
+                component: dubbo_mananger
+            },
+            {
+                path: '/interFaceConfig',
+                name: 'interFaceConfig',
+                meta: { "title": "接口配置" },
+                component: interfaceConfig
+            },
+            {
                 path: '/swagger-update',
                 name: 'Swagger_api_new',
                 meta: { "title": "更新接口" },
@@ -196,9 +233,22 @@ const routes = [
                 name: 'Role_auth_manage',
                 meta: { "title": "角色管理" },
                 component: Role_auth
-            },
+            }
         ]
-    }
+    },
+            {
+                path: '/Env_Navigations_manage',
+                name: 'Env_Navigations_manage',
+                component: Env_Navigations_manage,
+                children: [
+                    {
+                        path: '/Env_Navigation',
+                        name: 'Env_Navigation',
+                        meta: { "title": "环境导航" },
+                        component: Env_Navigation
+                    }
+                ]
+            }
 ]
 
 const router = new VueRouter({

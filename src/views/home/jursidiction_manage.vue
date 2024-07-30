@@ -22,7 +22,7 @@
                   type="primary"
                   style="background-color: #3573fe"
                   @click="addJursidiction(1)"
-                  v-has="{class:'76'}"
+                  v-has="{class:'32'}"
               >新增
               </el-button>
             </el-row>
@@ -123,7 +123,7 @@
                     @click="addJursidiction(2, scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'78'}"
+                    v-has="{class:'34'}"
                 >增加下级权限
                 </el-button
                 >
@@ -131,7 +131,7 @@
                     @click="putjurisdiction(scope.row)"
                     type="text"
                     size="small"
-                    v-has="{class:'79'}"
+                    v-has="{class:'35'}"
                 >编辑
                 </el-button
                 >
@@ -140,7 +140,7 @@
                     type="text"
                     size="small"
                     style="color:red"
-                    v-has="{class:'80'}"
+                    v-has="{class:'36'}"
                     v-if="scope.row.status==1"
                 >删除
                 </el-button

@@ -3,10 +3,9 @@ import { Message } from 'element-ui';
 import router from '@/router/index';
 import { Loading } from 'element-ui';
 
-// 创建axios实例
-// var baseURL
-
-// baseURL = process.env.VUE_APP_BASE_API //每个环境所对应的不同的baseURL
+// // 创建axios实例
+var baseURL
+baseURL = window.VUE_APP_BASE_API //每个环境所对应的不同的baseURL VUE_APP_BASE_API
 
 let loadingInstance = null
 function startLoading () {
@@ -35,7 +34,7 @@ function tryHideFullScreenLoading () {
 }
 
 const service = axios.create({
-  // baseURL: baseURL,
+  baseURL: baseURL,
   timeout: 300000,
     // 链接超时  当发送时间超过300秒就不再发送了
     // 若网速过慢发送不成功就会报错

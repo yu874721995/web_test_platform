@@ -7,7 +7,7 @@
 
       <div style=" margin-left:1%;">
         <el-button type="primary" size="small" style="margin-top:10px;background-color: #3573fe;float: left;margin-left: 10px;"
-                   v-has="{class:'124'}"
+                   v-has="{class:'80'}"
 
                    @click="create_role_dis=true;title='创建角色';">创建角色
         </el-button>
@@ -33,13 +33,13 @@
             <template slot-scope="scope">
 
               <el-button style="border:none;width: 20px;height: 20px;float: left;padding: 0;line-height: 20px;"
-                         class="el-icon-edit-outline" v-if="scope.row.id !==1" v-has="{class:'125'}"
+                         class="el-icon-edit-outline" v-if="scope.row.id !==1" v-has="{class:'81'}"
                          @click="create_role_dis=true;select_role = scope.row.id;title='编辑角色';
                          select_role_name=scope.row.name;"></el-button>
 
               <el-button style="border:none;width: 20px;height: 20px;float: left;padding: 0;line-height: 20px;"
                          class="el-icon-delete" @click="delete_role_dis=true;delete_role_id = scope.row.id"
-                         v-if="scope.row.id !==1" v-has="{class:'126'}"></el-button>
+                         v-if="scope.row.id !==1" v-has="{class:'82'}"></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -69,7 +69,7 @@
           </div>
           <div style="float: right;margin-bottom: 10px;">
             <el-button type="primary" size="small" style="background-color: #3573fe;"
-                       @click="add_role_user_dis = true" v-has="{class:'127'}">新增
+                       @click="add_role_user_dis = true" v-has="{class:'83'}">新增
             </el-button>
           </div>
           <div style="float: top;">
@@ -90,7 +90,7 @@
               <el-table-column label="操作" width="100" align="center">
                 <template slot-scope="scope">
                   <el-button type="text" @click="delete_role_user(scope.row)" size="small" style="color: red"
-                             v-has="{class:'128'}">删除
+                             v-has="{class:'84'}">删除
                   </el-button>
                 </template>
               </el-table-column>
@@ -139,7 +139,7 @@
 
           <div style="float: bottom;margin-bottom: 10px;">
             <el-button type="primary" size="small" style="background-color: #3573fe;"
-                       @click="update_role_auth" v-has="{class:'129'}">保存
+                       @click="update_role_auth" v-has="{class:'85'}">保存
             </el-button>
           </div>
 

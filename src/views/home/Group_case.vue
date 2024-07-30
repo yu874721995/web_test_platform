@@ -10,7 +10,7 @@
           <div style="float: left; margin-left: 1%">
             <a style="font-size: 13px">项目名称</a>
             <el-select v-model="list_page_body.projectId" clearable filterable style="width: 150px; margin-left: 10px"
-                       @change="select_project">
+                       >
               <el-option v-for="item in project_list" :key="item.id" :label="item.project_name" :value="item.id">
               </el-option>
             </el-select>
@@ -28,8 +28,7 @@
                 style="width: 150px; margin-left: 10px"
                 v-model="list_page_body.module"
                 :options="module_options"
-                :props="{ value: 'id', label: 'name',multiple: true, checkStrictly: true}"
-                collapse-tags
+                :props="{ value: 'id', label: 'name',multiple: false, checkStrictly: false}"
                 :show-all-levels="false"
                 clearable></el-cascader>
           </div>
@@ -50,10 +49,10 @@
                        style="background-color: #3573fe;margin-right: 20px; float: right;margin-top: 50px;text-align: center;"
                        size="small" @click="addgroup">添加用例
             </el-button>
-            <el-button type="primary"
+            <!-- <el-button type="primary"
                        style="background-color: #3573fe;margin-right: 20px; float: right;margin-top: 50px;text-align: center;"
                        size="small" @click="group_env_options_dislog=true">批量执行
-            </el-button>
+            </el-button> -->
           </div>
         </div>
       </div>
@@ -121,12 +120,11 @@
             <el-table-column style="background-color: #ffffff" fixed="right" label="操作" width="200" align="center">
               <template slot-scope="scope">
                 <el-button @click="putgroup(scope.row,'put')"
-                           v-if="scope.row.creator_nickname === user_name || user_name ==='yude.gu' || user_name ==='yulong.wang'"
                            type="text" size="small">编辑
                 </el-button>
                 <el-button @click="putgroup(scope.row,'copy')" type="text" size="small">复制</el-button>
                 <el-button type="text" @click="deletecase(scope.row)"
-                           v-if="scope.row.creator_nickname === user_name || user_name === 'yude.gu' || user_name === 'yulong.wang'"
+                           v-if="scope.row.creator_nickname === user_name "
                            size="small" style="color: red">删除
                 </el-button>
                 <el-button type="text" @click="selectEnv(scope.row,1)" size="small">执行</el-button>
@@ -171,7 +169,7 @@
               <a style="font-size: 10px">项目名称</a>
               <el-select v-model="case_list_page_body.projectId" clearable filterable
                          style="width: 150px; margin-left: 10px"
-                         @change="select_project">
+                         >
                 <el-option v-for="item in project_list" :key="item.id" :label="item.project_name" :value="item.id">
                 </el-option>
               </el-select>
@@ -185,7 +183,7 @@
 
             <div style="float: left; margin-left: 10px">
               <a style="font-size: 10px">用例类型</a>
-              <el-select v-model="case_list_page_body.tag" multiple clearable filterable placeholder="请选择"
+              <el-select v-model="case_list_page_body.tag" clearable filterable placeholder="请选择"
                          style="width: 150px; margin-left: 10px">
                 <el-option
                     v-for="item in tags"
@@ -201,12 +199,18 @@
                   style="width: 150px; margin-left: 10px"
                   v-model="case_list_page_body.module"
                   :options="module_options"
-                  :props="{ value: 'id', label: 'name',multiple: true, checkStrictly: true}"
-                  collapse-tags
+                  :props="{ value: 'id', label: 'name',multiple: false, checkStrictly: false}"
                   :show-all-levels="false"
                   clearable
               ></el-cascader>
             </div>
+
+            <div style="float: left; margin-left: 10px">
+            <a style="font-size: 13px">创建人</a>
+            <el-input placeholder="请输入创建人" clearable v-model="case_list_page_body.create_user"
+                      style="width: 150px; margin-left: 10px"
+                      class="case_input"></el-input>
+          </div>
 
             <div style="float: left; padding-left: 5px">
               <el-button plain icon="el-icon-search" @click="handleCurrentChangeCase(1)">查询</el-button>
@@ -260,6 +264,7 @@
     <!--    新增弹框-->
     <el-dialog :visible.sync="add_group_case_dis" width="1200px" style="margin-top: -20px; height: 100%" show-footer
                :close-on-press-escape="false"
+               @closed="formdialogclosed"
                :close-on-click-modal="false">
       <span slot="title" style="font-size:20px;">{{ title }}</span>
       <el-form :model="ruleForm" :rules="rules" :inline-message="true" :status-icon=true ref="ruleForm">
@@ -282,7 +287,6 @@
               style="width: 300px"
               :options="module_options"
               :props="{ value: 'id', label: 'name'}"
-              collapse-tags
               :show-all-levels="false"
               clearable
           ></el-cascader>
@@ -299,21 +303,20 @@
             <el-button type="primary" @click="caselist" style="float: left;margin-bottom: 10px;">添加明细</el-button>
             <el-button type="primary" @click="clearcaselist" style="float: left;margin-bottom: 10px;">全部移除</el-button>
             <el-form-item style="float: right;width: 275px;">
-              <el-button type="primary" @click="add_single_case" style="float: left;">新增单用例</el-button>
+              <!-- <el-button type="primary" @click="add_single_case" style="float: left;">新增单用例</el-button> -->
               <el-button type="primary" @click="submitForm('ruleForm')" style="float: left;">保存</el-button>
               <el-button @click="cancel_again_alter = true" style="float: left;">取消</el-button>
             </el-form-item>
 
-            <el-table @sort-change="changeTableSort"
-                      :data="selectcheckCase" :v-loading="isLoading" style="font-size: 13px"
-                      :header-cell-style="{ background: '#E7EAED' }" height="500"
+            <el-table :data="selectcheckCase" :v-loading="isLoading" style="font-size: 13px"
+                      :header-cell-style="{ background: '#E7EAED' }" height="500" row-key="id" ref="singleCaseList"
                       width="100%" :row-style="{ height: '40px' }" :cell-style="{ padding: '0px' }"
                       :highlight-current-row="true" :stripe="true" :border=true>
-              <el-table-column prop="sorts" label="排序" width="100px" sortable="custom" align="center">
+              <!-- <el-table-column prop="sorts" label="排序" width="100px" sortable="custom" align="center">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.sorts" @input="sort_input($event,scope.$index)" required></el-input>
                 </template>
-              </el-table-column>
+              </el-table-column> -->
               <el-table-column prop="id" label="用例id" width="70"></el-table-column>
               <el-table-column prop="name" label="用例名称" width="250"></el-table-column>
               <el-table-column prop="delay_time" label="延时(s)" align="center" width="70"></el-table-column>
@@ -330,8 +333,7 @@
                   width="150"
                   align="center">
                 <template slot-scope="scope">
-                  <el-button type="text" @click="update_select_case(scope.row)" size="small"
-                             v-if="scope.row.creator_nickname === user_name || user_name ==='yude.gu' || user_name ==='yulong.wang'">
+                  <el-button type="text" @click="update_select_case(scope.row)" size="small">
                     编辑
                   </el-button>
                   <el-button type="text" @click="delete_select_case(scope.row,scope.$index)" size="small">删除</el-button>
@@ -360,7 +362,7 @@
 
     <!--选择执行环境弹框-->
     <el-dialog title="选择执行环境" :visible.sync="group_env_options_dislog" width="30%"
-               style="margin-top: 250px;height: 350px;"
+               style="margin-top: 250px;height: 400px;"
                :close-on-press-escape="false"
                :close-on-click-modal="false"
                @close="group_env_options_dislog=false"
@@ -372,8 +374,8 @@
           <el-cascader v-model="envForm.env"
                        placeholder="请搜索运行环境"
                        :options="env_options"
-                       filterable
-                       :props="{value:'server_env',label:'server_env'}"
+                       filterable clearable
+                       :props="{value:'id',label:'env_name'}"
           ></el-cascader>
         </el-form-item>
         <el-form-item
@@ -384,14 +386,21 @@
           <el-select
               v-model="envForm.cookie"
               placeholder="请搜索运行账号"
-              clearable>
+              clearable filterable>
             <el-option
                 v-for="item in account"
                 :key="item.id"
                 :label="item.account_name"
-                :value="item.cookie"
+                :value="item.id"
             ></el-option>
           </el-select>
+        </el-form-item>
+        <!-- 增加选择项，是否更新账号 ---wangmingming  2023-08-09 -->
+        <el-form-item label="更新账号" prop="is_edit" style="padding-left: 100px">
+          <el-radio-group v-model="envForm.is_edit">
+            <el-radio v-model="envForm.is_edit" label="1">是</el-radio>
+            <el-radio v-model="envForm.is_edit" label="0">否</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label-width="30%">
           <el-button @click="group_env_options_dislog = false"
@@ -454,39 +463,36 @@
         @close="single_case_update_dis=false"
 
     >
-      <span slot="title" style="font-size: 20px">{{ title }}</span>
+      <span slot="title" style="font-size: 20px">编辑用例</span>
 
       <el-form :model="single_case_form" :rules="rules" :inline-message="true" :status-icon="true" ref="ruleForm"
                label-width="auto">
 
-        <el-form-item label="用例名称" prop="name" style="width: 450px;float: left;">
+               <el-form-item label="用例名称" prop="name" style="width: 50%;float: left;">
           <el-input v-model="single_case_form.name" placeholder="请详细输入用例名称" style="width: 300px;"></el-input>
         </el-form-item>
 
-        <el-form-item label="接口路径" prop="url" style="width: 450px;float: left;">
+        <el-form-item label="接口路径" prop="url" style="width: 50%;float: left;">
           <el-input v-model="single_case_form.url" placeholder="请输入域名后面的接口url路径" style="width: 300px;"></el-input>
         </el-form-item>
 
-        <el-form-item label="延时时间" prop="delay_time" style="width: 450px;float: left;">
+        <el-form-item label="请求方式" prop="req_method" style="width: 50%;float: left;">
+          <el-radio-group v-model="single_case_form.req_method">
+            <el-radio v-model="single_case_form.req_method" label="GET">GET</el-radio>
+            <el-radio v-model="single_case_form.req_method" label="POST">POST</el-radio>
+            <el-radio v-model="single_case_form.req_method" label="PUT">PUT</el-radio>
+            <el-radio v-model="single_case_form.req_method" label="DELETE">DELETE</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item label="延时时间" prop="delay_time" style="width: 50%;float: left;">
           <el-input v-model="single_case_form.delay_time" placeholder="请详延时时间(数字)" type="number"
                     style="width: 300px;"></el-input>
         </el-form-item>
 
-        <el-form-item label="选择job" prop="delay_time" style="width: 300px;float: left;">
-          <!--          <el-input v-model="ruleForm.job_id" placeholder="按需选择job" disabled-->
-          <!--                    style="width: 300px;" @click.native="job_click"></el-input>-->
-          <el-cascader
-              style="width: 300px"
-              v-model="single_case_form.job_id"
-              :options="job_arr"
-              filterable
-              :disabled="changejob"
-              @click.native="job_click"
-              @change="job_handle_change"
-          ></el-cascader>
-        </el-form-item>
+        
 
-        <el-form-item label="所属项目" prop="project_id" style="width: 300px;float: left;">
+        <el-form-item label="所属项目" prop="project_id" style="width: 50%;float: left;">
           <el-select v-model="single_case_form.project_id" clearable filterable style="width: 150px;float:left;"
                      @change="add_select_project">
             <el-option v-for="item in project_list" :key="item.id" :label="item.project_name" :value="item.id">
@@ -494,14 +500,14 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="用例类型" prop="tag" style="width: 300px;float: left;">
+        <el-form-item label="用例类型" prop="tag" style="width: 50%;float: left;">
           <el-select v-model="single_case_form.tag" multiple clearable filterable placeholder="请选择"
-                     style="width: 150px;float: left;">
+                     style="width: 250px;float: left;">
             <el-option v-for="item in tags" :key="item.value" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </el-form-item>
 
-        <el-form-item label="所属模块" prop="module" style="width: 300px;float: left;">
+        <el-form-item label="所属模块" prop="module" style="width: 50%;float: right;">
           <el-cascader
               v-model="single_case_form.module"
               style="width: 150px;float: left;"
@@ -513,82 +519,139 @@
           ></el-cascader>
         </el-form-item>
 
-        <el-form-item label="请求方式" prop="req_method" style="width: 100%;float: left;">
-          <el-radio-group v-model="single_case_form.req_method">
-            <el-radio v-model="single_case_form.req_method" label="GET">GET</el-radio>
-            <el-radio v-model="single_case_form.req_method" label="POST">POST</el-radio>
-            <el-radio v-model="single_case_form.req_method" label="PUT">PUT</el-radio>
-            <el-radio v-model="single_case_form.req_method" label="DELETE">DELETE</el-radio>
+
+        
+
+        <el-form-item label="接口参数类型" prop="content_type" style="width: 50%;float: left;">
+          <el-radio-group v-model="single_case_form.content_type">
+            <el-radio v-model="single_case_form.req_method" label="application/json">json</el-radio>
+            <el-radio v-model="single_case_form.req_method" label="form-data">data</el-radio>
+            <el-radio v-model="single_case_form.req_method" label="application/x-www-form-urlencoded">urlencoded</el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="启用job" prop="use_job" style="width: 300px;float: left;">
+        <el-form-item label="运行环境" prop="env" style="width: 50%;float: left;">
+          <el-cascader v-model="single_case_form.execution_env"
+                       placeholder="请搜索运行环境"
+                       :options="env_options"
+                       filterable clearable 
+                       :props="{value:'id',label:'env_name'}"
+          ></el-cascader>
+        </el-form-item>
+
+        <el-form-item label="运行账号" prop="cookie" style="width: 50%;float: left;">
+          <el-select v-model="single_case_form.execution_account" placeholder="请搜索运行账号" clearable filterable>
+            <el-option v-for="item in account" :key="item.id" :label="item.account_name"
+                       :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="启用job" prop="use_job" style="width: 50%;float: left;">
           <el-radio-group v-model="single_case_form.use_job" @change="selectJobChange($event)">
             <el-radio v-model="single_case_form.use_job" label="1">启用</el-radio>
             <el-radio v-model="single_case_form.use_job" label="0">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
 
+        <el-form-item label="选择job" prop="job_id" style="width: 50%;float: left;">
+          <!--          <el-input v-model="ruleForm.job_id" placeholder="按需选择job" disabled-->
+          <!--                    style="width: 300px;" @click.native="job_click"></el-input>-->
+          <el-cascader
+              style="width: 300px"
+              v-model="ruleForm.job_id"
+              :options="job_arr"
+              filterable
+              :disabled="changejob"
+              @click.native="job_click"
+              @change="job_handle_change"
+          ></el-cascader>
+        </el-form-item>
+
         <div id="header_menu_div"
              style="margin-left: 0px; flex-direction: column; width: 100%;height: 440px;float: left;">
 
-          <el-form-item label="单用例接口" prop="single_body"
-                        style="float: left;width: 100%;height: 300px;">
-            <vue-json-editor v-model="single_case_form.single_body" :key="1" :mode="'code'"
+             <el-form-item label="单接口参数" prop="single_body" style="float: left;width: 100%;height: 300px;">
+            <el-tooltip placement="top">
+              <div slot="content">单个接口调试参数，支持关键词<br/>--file.:使用文件参数的参数名，使用实例:"id":"file.xxId"</div>
+            <vue-json-editor v-model="single_case_form.single_body" :key="key" :mode="'code'"
                              @has-error="json_editor_error($event,'single_body')"
                              style="float: left;width: 100%;height: 300px;">
             </vue-json-editor>
+          </el-tooltip>
           </el-form-item>
 
-          <div style="z-index: 6666;position: fixed; margin-left: 700px;margin-top: 290px;float: left;">
-            <el-form-item>
-              <el-button type="primary" @click="update_single_case">确定</el-button>
-              <el-button @click="single_case_update_dis = false">取消</el-button>
-            </el-form-item>
-          </div>
 
-
-          <el-form-item label="组合用例" prop="group_body"
-                        style="float: left;width: 100%;height: 300px;">
-            <vue-json-editor v-model="single_case_form.group_body" :key="2" :mode="'code'"
+          <el-form-item label="多接口参数" prop="group_body" style="float: left;width: 100%;height: 300px;">
+            <el-tooltip placement="top">
+              <div slot="content">组合执行/批量执行时使用的参数，支持关键词<br/>
+                --file.:使用文件参数的参数名，使用实例:"id":"file.xxId",每次使用都会根据文件参数中的配置更改文件内容
+                <br/>--parmes.:使用其他接口中的提取参数，使用实例:"id":"parmes.xxId"
+                <br/>--func.:使用use_fixture中提前配置的自定义方法，使用实例:"id":"func.xxId"
+                <br/>--arrays.:参数化，使用arrays参数会自动将单条用例组合为多条用例，使用实例:"id":"arrays.[1,'1',null,'999999','','parmes.xxx']"
+                <br/>arrays参数目前只支持单层结构，即参数化的参数属于最外层
+              </div>
+            <vue-json-editor v-model="single_case_form.group_body" :key="key" :mode="'code'"
                              style="float: left;width: 100%;height: 300px;"
                              @has-error="json_editor_error($event,'group_body')" lang="zh">
             </vue-json-editor>
+            </el-tooltip>
           </el-form-item>
 
-          <el-form-item label="断言" prop="assert_res"
-                        style="float: left;width: 100%;height: 200px;">
-            <vue-json-editor v-model="single_case_form.assert_res" :key="3" :mode="'code'"
+          <el-form-item label="断言" prop="assert_res" style="float: left;width: 100%;height: 200px;">
+            <el-tooltip placement="top">
+              <div slot="content">接口调用完成后，判断接口是否执行成功的参数校验<br/>
+                例：断言设置为{"code":50}即在接口调用完成后检查接口返回内容中code是否等于50,
+                <br/>--支持jsonpath,例：断言设置为{"data[0].result[1].values.id":"50"}即检查接口返回内容中data下第一个数据中的result下的第2个数据的values下的id是否等于50
+              <br/>--未设置断言时默认断言为：status_code == 200
+              </div>
+            <vue-json-editor v-model="single_case_form.assert_res" :key="key" :mode="'code'"
                              style="float: left;width: 100%;height: 200px;"
                              @has-error="json_editor_error($event,'assert_res')" lang="zh"></vue-json-editor>
+                             </el-tooltip>
           </el-form-item>
 
-          <el-form-item label="前置sql" prop="pre_sql" style="float: left;width: 100%;height: 200px;">
-            <vue-json-editor v-model="single_case_form.pre_sql" :key="4" :mode="'code'"
+          <el-form-item label="前置SQL" prop="pre_sql" style="float: left;width: 100%;height: 200px;">
+            <el-tooltip placement="top">
+              <div slot="content">前置sql,支持执行或查询sql,在接口请求前调用<br/>
+                --执行sql,key使用insert、update、delete，例:{"update":"update xxxx set xxxx = 'xxx' where id = xxx;"}
+                <br/>--查询sql,key使用自定义名称，查询完成会赋值给该key,在接口参数中可直接使用parmes关键词使用,例:{"xiaoyu":"select id from xxxx where create_time='xxxx-xx-xx';"}
+              </div>
+            <vue-json-editor v-model="single_case_form.pre_sql" :key="key" :mode="'code'"
                              style="float: left;width: 100%;height: 200px;"
                              @has-error="json_editor_error($event,'pre_sql')" lang="zh"></vue-json-editor>
+                            </el-tooltip>
           </el-form-item>
 
-          <el-form-item label="后置sql" prop="end_sql" style="float: left;width: 100%;height: 200px;">
-            <vue-json-editor v-model="single_case_form.end_sql" :key="5" :mode="'code'"
+          <el-form-item label="后置SQL" prop="end_sql" style="float: left;width: 100%;height: 200px;">
+            <el-tooltip placement="top">
+              <div slot="content">后置sql,支持执行或查询sql,在接口请求后调用<br/>
+                --执行sql,key使用insert、update、delete，例:{"update":"update xxxx set xxxx = 'xxx' where id = xxx;"}
+                <br/>--查询sql,key使用自定义名称，查询接口会赋值给该key,在接口参数中可直接使用parmes关键词使用,例:{"xiaoyu":"select id from xxxx where create_time='xxxx-xx-xx';"}
+              </div>
+            <vue-json-editor v-model="single_case_form.end_sql" :key="key" :mode="'code'"
                              style="float: left;width: 100%;height: 200px;"
                              @has-error="json_editor_error($event,'end_sql')" lang="zh"></vue-json-editor>
+                            </el-tooltip>
           </el-form-item>
 
-          <el-form-item label="提取参数" prop="extract_param"
-                        style="float: left;width: 100%;height: 200px;">
-            <vue-json-editor v-model="single_case_form.extract_param" :key="6" :mode="'code'"
+          <el-form-item label="提取参数" prop="extract_param" style="float: left;width: 100%;height: 200px;">
+            <el-tooltip placement="top">
+              <div slot="content">接口调用成功后，断言执行前提取接口响应中的内容，赋值给指定key，在后续接口参数中使用<br/>
+                --提取方式支持jsonpath,例：设置为{"xiaoyu_id":"data[0].result[1].values.id"}即提取接口返回内容中data下第一个数据中的result下的第2个数据的values下的id赋值给xiaoyu_id,在其他接口中使用parmes.xiaoyu_id即可使用
+                </div>
+            <vue-json-editor v-model="single_case_form.extract_param" :key="key" :mode="'code'"
                              style="float: left;width: 100%;height: 200px;"
                              @has-error="json_editor_error($event,'extract_param')" lang="zh"></vue-json-editor>
-          </el-form-item>
-
-          <el-form-item label="单接口结果" prop="single_case_reponse"
-                        style="float: left;width: 100%;height: 200px;">
-            <vue-json-editor v-model="single_case_form.single_case_reponse" :key="7" :mode="'code'" lang="zh"
-                             style="float: left;width: 100%;height: 200px;"
-                             @has-error="json_editor_error($event,'single_case_reponse')"></vue-json-editor>
+                            </el-tooltip>
           </el-form-item>
         </div>
+        <div style="z-index:6666;position: fixed;margin-left: 700px;margin-top: 300px;float: left;">
+            <el-form-item>
+              <el-button type="primary" @click="submitSingleForm()">确定</el-button>
+              <el-button @click="single_case_update_dis = false">取消</el-button>
+              <!-- <el-button type="primary" @click="selectEnv(ruleForm)">调试</el-button> -->
+            </el-form-item>
+          </div>
 
 
       </el-form>
@@ -676,6 +739,7 @@
 import Breadcrumb from "@/components/Breadcrumb";
 import axios from "axios";
 import vueJsonEditor from "vue-json-editor";
+import Sortable from 'sortablejs'
 
 export default {
 
@@ -708,11 +772,12 @@ export default {
         page: 1,
         size: 20,
         module: [],
-        create_user: "",
+        create_user:localStorage.getItem("username")
       },
       case_list_page_body: {
         page: 1,
         size: 20,
+        create_user:localStorage.getItem("username")
       },
       //运行结果表单
       group_case_result_form: {},
@@ -725,7 +790,7 @@ export default {
       case_total: 0,
       changejob:true,
       account: [],
-      envForm: {env: ""},
+      envForm: JSON.parse(window.localStorage.getItem('envForm')) || {env: "",is_edit:"1"},
       excutionrow: {},
       //运行弹框状态
       run_groupcase_dislog: false,
@@ -766,26 +831,7 @@ export default {
         caseId_list: []
       },
       single_case_update_dis: false,
-      single_case_form: {
-        name: "",
-        req_method: "get",
-        url: "",
-        tag: [1],
-        single_body: {},
-        group_body: {},
-        assert_res: {},
-        extract_param: {},
-        pre_sql: {},
-        end_sql: {},
-        source: "",
-        delay_time: 0,
-        // job_param: "",
-        // job_podid: "",
-        // job_id: "",
-        // job_parmes: "",
-        // assembly_id: "",
-        use_job: "0",
-      },
+      single_case_form: {},
       env_rules: {
         env: [{required: true, message: "请选择环境", trigger: "blur"}],
         cookie: [{required: true, message: "请选择账号", trigger: "blur"}],
@@ -808,6 +854,22 @@ export default {
     };
   },
   methods: {
+
+    rowDrop() {
+      console.log(this.$refs.singleCaseList.$el.querySelectorAll('.el-table__body-wrapper > table > tbody'))
+      const el = this.$refs.singleCaseList.$el.querySelectorAll('.el-table__body-wrapper > table > tbody')[0]
+      this.sortable = Sortable.create(el, {
+        ghostClass: 'sortable-ghost',
+        setData: function (dataTransfer) {
+          dataTransfer.setData('Text', '')
+        },
+        onEnd: evt => {
+          const targetRow = this.selectcheckCase.splice(evt.oldIndex, 1)[0];
+          this.selectcheckCase.splice(evt.newIndex, 0, targetRow);
+        }
+      });
+    },
+
     selectJobChange(val){
       if(val == '1'){
         this.changejob = false;
@@ -834,12 +896,12 @@ export default {
           });
     },
     //选中下拉框事件
-    select_project(val) {
-      if (val) {
-        this.list_page_body.projectId = val;
-      } else {
-        delete this.list_page_body['projectId'];
-      }
+    select_project() {
+      // if (val) {
+      //   this.list_page_body.projectId = val;
+      // } else {
+      //   delete this.list_page_body['projectId'];
+      // }
     },
     //获取环境列表
     get_env_list() {
@@ -849,8 +911,6 @@ export default {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
               this.env_options = res.data["items"];
-
-              this.env_name = this.env_options.env_name;
             }
           })
           .catch(() => {
@@ -868,12 +928,18 @@ export default {
           }
           if (this.title === '编辑组合') {
             this.ruleForm.caseId_list = [];
-            this.changeTableSort()
+            // this.changeTableSort()
             for (var i = 0; i < this.selectcheckCase.length; i++) {
               this.ruleForm.caseId_list.push(this.selectcheckCase[i].id)
             }
             this.ruleForm.case_data = this.selectcheckCase
-            axios.put("/api/api_case/cases/" + this.ruleForm.id, this.ruleForm).then((res) => {
+            axios.post("/api/test_case/UpdateGroupCase" , {
+              id:this.ruleForm.id,
+              project_id:this.ruleForm.project_id,
+              name:this.ruleForm.name,
+              description:this.ruleForm.description,
+            module:this.ruleForm.module,
+          caseId_list:this.ruleForm.caseId_list}).then((res) => {
               if (res.data.code === 10000) {
                 this.isLoading = false;
                 this.$message({
@@ -890,12 +956,17 @@ export default {
             })
           } else {
             this.ruleForm.caseId_list = [];
-            this.changeTableSort()
             for (var j = 0; j < this.selectcheckCase.length; j++) {
               this.ruleForm.caseId_list.push(this.selectcheckCase[j].id)
             }
             this.ruleForm.case_data = this.selectcheckCase
-            axios.post("/api/api_case/cases", this.ruleForm).then((res) => {
+            axios.post("/api/test_case/CreateGroupCase", 
+            {project_id:this.ruleForm.project_id,
+              name:this.ruleForm.name,
+              description:this.ruleForm.description,
+            module:this.ruleForm.module,
+          caseId_list:this.ruleForm.caseId_list}
+              ).then((res) => {
               this.isLoading = true;
               if (res.data.code === 10000) {
                 this.isLoading = false;
@@ -922,7 +993,7 @@ export default {
     },
     get_group_list() {
       axios
-          .post("/api/api_case/cases/page", this.list_page_body)
+          .post("/api/test_case/GroupCaseList", this.list_page_body)
           .then((res) => {
             this.isLoading = true;
             if (res.data["code"] === 10000) {
@@ -944,40 +1015,36 @@ export default {
     },
     //复制/编辑用例
     putgroup(row, type) {
+      this.ruleForm = JSON.parse(JSON.stringify(row))
+      axios
+            .post("/api/test_case/getCaseList", {
+              caseList:eval(this.ruleForm.caseId_list),
+            })
+            .then((res) => {
+              if (res.data["code"] === 10000) {
+                this.$message({
+                  duration: 2000, message: res.data.msg, type: "success",
+                });
+                this.ruleForm.case_data = res.data.data
+                this.ruleForm.module = []
+                if (row.module) {
+                  eval(row.module).forEach((item) => {
+                    this.ruleForm.module.push(parseInt(item))
+                  })
+                }
+                this.selectcheckCase =  this.ruleForm.case_data;
+                this.add_group_case_dis = true;
+                this.rowDrop();
+              } else {
+                this.$message.error(res.data.msg);
+                this.ruleForm.case_data = []
+              }
+            });
       if (type === 'copy') {
         this.title = '复制组合'
-        axios.get("/api/api_case/cases/" + row.id).then((res) => {
-          this.selectcheckCase = res.data.data.case_data;
-          for (var i = 0; i < this.selectcheckCase.length; i++) {
-            this.selectcheckCase[i]['sorts'] = i;
-          }
-          this.ruleForm.name = res.data.data.name;
-          this.ruleForm.project_id = res.data.data.project_id;
-          this.ruleForm.description = res.data.data.description;
-          this.ruleForm.id = res.data.data.id
-        });
       } else {
-        this.ruleForm = JSON.parse(JSON.stringify(row))
         this.title = '编辑组合'
-        axios.get("/api/api_case/cases/" + row.id).then((res) => {
-          this.selectcheckCase = res.data.data.case_data;
-          for (var i = 0; i < this.selectcheckCase.length; i++) {
-            this.selectcheckCase[i]['sorts'] = i;
-          }
-          this.ruleForm.name = res.data.data.name;
-          this.ruleForm.project_id = res.data.data.project_id;
-          this.ruleForm.description = res.data.data.description;
-          this.ruleForm.id = res.data.data.id
-        });
-        this.ruleForm.module = []
-        if (row.module) {
-          row.module.forEach((item) => {
-            this.ruleForm.module.push(parseInt(item))
-          })
-        }
-
       }
-      this.add_group_case_dis = true;
     },
     //新增弹框初始化
     addgroup() {
@@ -998,7 +1065,7 @@ export default {
       this.delete_again_alter = true;
     },
     delete_group_case() {
-      axios.delete("/api/api_case/cases/" + this.delete_id).then((res) => {
+      axios.post("/api/test_case/DeleteGroupCase" ,{id:this.delete_id}).then((res) => {
         if (res.data["code"] === 10000) {
           this.delete_again_alter = false;
           this.handleCurrentChange(1);
@@ -1023,13 +1090,20 @@ export default {
     },
     //执行组合用例
     excutioncase() {
+      if (!window.localStorage.getItem('envForm') || window.localStorage.getItem('envForm') != this.envForm){
+          window.localStorage.setItem('envForm',JSON.stringify(this.envForm))
+        }
       if (this.env_conf === 1) {
         axios
-            .post("/api/api_case/cases/" + this.excutionrow.id + "/run", {
+            .post("/api/test_case/BuildGroupCase", {
+              caseList:[],
+              caseGroupList:[this.excutionrow.id],
               project_id: this.excutionrow.project_id,
               runEnv: this.envForm.env[1],
+              is_edit: this.envForm.is_edit,
               runCookie: this.envForm.cookie,
               runUserNickname: "admin",
+              run_type:2
             })
             .then((res) => {
               if (res.data["code"] === 10000) {
@@ -1037,19 +1111,21 @@ export default {
                   duration: 2000, message: res.data.msg, type: "success",
                 });
                 this.group_env_options_dislog = false;
-                this.group_case_result_form = res.data.data;
-                this.group_case_result_form.name = this.excutionrow.name;
-                this.run_groupcase_dislog = true;
-                this.env_conf = 2;
-                this.group_case_result_form.response = res.data.data.output.case_res;
-                this.group_case_result_form.assert_data = res.data.data.output.assert_data;
+                // this.group_case_result_form = res.data.data;
+                // console.log(this.group_case_result_form)
+                // this.group_case_result_form.name = this.excutionrow.name;
+                // this.run_groupcase_dislog = true;
+                // this.env_conf = 2;
+                // this.group_case_result_form.response = res.data.data.output.case_res;
+                // this.group_case_result_form.assert_data = res.data.data.output.assert_data;
               } else {
                 this.$message.error(res.data.msg);
               }
             });
       } else if (this.env_conf === 3) {
         axios
-            .post("/api/api_case/case/" + this.excutionrow.id + "/run", {
+            .post("/api/test_case/buildSingleCase", {
+              id:this.excutionrow.id,
               project_id: this.excutionrow.project_id,
               runCookie: this.envForm.cookie,
               runEnv: this.envForm.env[1],
@@ -1079,13 +1155,14 @@ export default {
           this.more_excution_case_arr.push(parseInt(this.selectcheck[i].id));
         }
         axios
-            .post("/api/api_case/case/batch_run", {
+            .post("/api/test_case/BuildGroupCase", {
               projectId: this.selectcheck[0]['project_id'],
               caseList: [],
               caseGroupList: this.more_excution_case_arr,
               runEnv: this.envForm.env[1],
               runCookie: this.envForm.cookie,
               runUserNickname: this.user_name,
+              run_type:2
             })
             .then((res) => {
               if (res.data["code"] === 10000) {
@@ -1116,6 +1193,46 @@ export default {
         }
       });
     },
+    submitSingleForm(){
+    this.ruleForm.delay_time = this.single_case_form.delay_time;
+    axios
+        .post("/api/test_case/UpdateCase",this.single_case_form)
+        .then((res) => {
+          if (res.data.code === 10000) {
+            this.isLoading = false;
+            this.$message({
+              duration: 2000,
+              message: res.data.msg,
+              type: "success",
+            });
+            this.single_case_update_dis = false;
+            this.updateGroupCaseList(this.ruleForm.id)
+          } else {
+            this.isLoading = false;
+            this.$message.error(res.data.msg);
+          }
+        });
+    },
+
+    updateGroupCaseList(groupId){
+      axios
+        .post("/api/test_case/updateGroupCaseList",{groupId:groupId})
+        .then((res) => {
+          if (res.data.code === 10000) {
+            this.isLoading = false;
+            this.$message({
+              duration: 2000,
+              message: res.data.msg,
+              type: "success",
+            });
+              this.selectcheckCase = res.data.data
+            
+          } else {
+            this.isLoading = false;
+            this.$message.error(res.data.msg);
+          }
+        });
+    },
 
     //主页/添加用例列表选中事件
     handleSelect(selection, row) {
@@ -1134,30 +1251,42 @@ export default {
         this.$message.error('请先选择组合')
       }
     },
+    str_to_json(row){
+      try{
+        return JSON.parse(row)
+      }catch{
+      try{
+        return eval('(' + row.replace(/None/g,'null').replace(/False/g,'false').replace(/True/g,'true').replace('"[','[').replace(']"',']').replace('["','[').replace('"]',']').replace(/[\r|\n|\t]/g,'') + ')')
+      }catch{
+        return row
+      }
+      }
+    },
     //添加选中的用例
     add_select_case() {
       var select_data = this.$refs.add_select_table.selection;
-      var sort_arr = [];
-      var max = 0;
+      // var sort_arr = [];
+      // var max = 0;
+      this.rowDrop();
 
       for (let i in select_data) {
-        //提取排序数组
-        for (let j in this.selectcheckCase) {
-          if (this.selectcheckCase[j]['sorts'] !== undefined) {
-            sort_arr.push(parseInt(this.selectcheckCase[j]['sorts']))
-          }
-        }
-        //排序数组最大值
-        for (var k = 1; k < sort_arr.length; k++) {
-          if (max < sort_arr[k]) {
-            max = sort_arr[k];
-          }
-        }
-        if (max !== 0) {
-          select_data[i]['sorts'] = max + 1;
-        } else {
-          select_data[i]['sorts'] = this.selectcheckCase.length + 1;
-        }
+      //   //提取排序数组
+      //   for (let j in this.selectcheckCase) {
+      //     if (this.selectcheckCase[j]['sorts'] !== undefined) {
+      //       sort_arr.push(parseInt(this.selectcheckCase[j]['sorts']))
+      //     }
+      //   }
+      //   //排序数组最大值
+      //   for (var k = 1; k < sort_arr.length; k++) {
+      //     if (max < sort_arr[k]) {
+      //       max = sort_arr[k];
+      //     }
+      //   }
+      //   if (max !== 0) {
+      //     select_data[i]['sorts'] = max + 1;
+      //   } else {
+      //     select_data[i]['sorts'] = this.selectcheckCase.length + 1;
+      //   }
         this.selectcheckCase.push(select_data[i]);
       }
       this.caselistdialog = false;
@@ -1170,9 +1299,11 @@ export default {
 
     add_single_case() {
       this.single_case_form = {
+        creator_nickname:localStorage.getItem('username'),
         req_method: "GET",
         tag: [1],
         module: [],
+        content_type:"1",
         single_body: {},
         group_body: {},
         assert_res: {"code": "000000"},
@@ -1181,6 +1312,7 @@ export default {
         end_sql: {},
         single_case_reponse: {},
         delay_time: 0,
+        source: "手动创建",
         // job_param: "",
         // job_podid: "",
         // job_id: "",
@@ -1198,48 +1330,47 @@ export default {
       this.single_case_form = null;
       this.single_case_active = "single_body";
       this.single_title = "编辑用例";
-      axios.get("/api/api_case/case/" + row.id).then((res) => {
-        if (res.data['code'] === 10000) {
+      this.single_case_form = JSON.parse(JSON.stringify(row));
+      
+      this.single_case_form.use_job = String(row.use_job);
+      this.single_case_form.content_type = String(row.content_type);
+      this.single_case_form.tag = [parseInt(row.tag)];
+      this.job_form.job_parmes = this.single_case_form.job_parmes;
+      this.job_form.job_id = this.single_case_form.job_id;
+      this.single_case_form.delay_time = row.delay_time
+      this.job_form.liushuixian_id = this.single_case_form.assembly_id;
+      this.job_form.popId = this.single_case_form.job_podid;
+      this.single_case_form.single_body = this.str_to_json(row.single_body)
+      this.single_case_form.group_body = this.str_to_json(row.group_body)
+      this.single_case_form.pre_sql = this.str_to_json(row.pre_sql)
+      this.single_case_form.end_sql = this.str_to_json(row.end_sql)
+      this.single_case_form.extract_param = this.str_to_json(row.extract_param)
+      this.single_case_form.assert_res = this.str_to_json(row.assert_res)
+      this.single_case_form.module = []
+      this.single_case_form.execution_env = eval(this.single_case_form.execution_env)
+      eval(row.module).forEach((item) => {
+        this.single_case_form.module.push(parseInt(item))
+      })
+      this.single_case_update_dis = true;
+        
+      
+      // // 查看用例结果
+      // axios.get("/api/api_case/case/" + row.id + "/result").then((res) => {
+      //   this.single_case_form.single_case_reponse = res.data.data.output.response;
+      // });
 
-          this.single_case_form = res.data.data;
-          this.single_case_form.tag = [parseInt(this.single_case_form.tag)]
-          this.single_case_form.module = []
-
-          this.single_case_form.delay_time = String(this.single_case_form.delay_time);
-          if (this.single_case_form.use_job === "null" || this.single_case_form.use_job === null){
-            this.single_case_form.use_job="0";
-          }else{
-            this.single_case_form.use_job = String(this.single_case_form.use_job);
-          }
-          this.job_form.job_parmes = this.single_case_form.job_parmes;
-          this.job_form.job_id = this.single_case_form.job_id;
-          this.job_form.liushuixian_id = this.single_case_form.assembly_id;
-          this.job_form.popId = this.single_case_form.job_podid;
-
-          row.module.forEach((item) => {
-            this.single_case_form.module.push(parseInt(item))
-          })
-          this.single_case_update_dis = true;
-        } else {
-          this.$message.error(res.data.msg);
-        }
-      });
-      // 查看用例结果
-      axios.get("/api/api_case/case/" + row.id + "/result").then((res) => {
-        this.single_case_form.single_case_reponse = res.data.data.output.response;
-      });
-
+    },
+    formdialogclosed(){
+      this.get_group_list();
     },
 
     update_single_case() {
+      this.single_case_form.delay_time = parseInt(this.single_case_form.delay_time);
       if (this.single_title === "编辑用例") {
-        this.single_case_form.delay_time = parseInt(this.single_case_form.delay_time);
         axios
-            .put("/api/api_case/case/" + this.single_case_form.id, this.single_case_form)
+            .post("/api/test_case/UpdateCase" , this.single_case_form)
             .then((res) => {
               if (res.data.code === 10000) {
-                console.log(this.single_case_form)
-
                 this.$message({
                   duration: 2000,
                   message: res.data.msg,
@@ -1248,12 +1379,11 @@ export default {
                 this.single_case_update_dis = false;
                 this.handleCurrentChange(1);
               } else {
-                this.$message.error(res.data.error);
+                this.$message.error(res.data.msg);
               }
             });
       } else {
-        this.single_case_form.delay_time = parseInt(this.single_case_form.delay_time);
-        axios.post("/api/api_case/case", this.single_case_form).then((res) => {
+        axios.post("/api/test_case/CreateCase", this.single_case_form).then((res) => {
           this.isLoading = true;
           if (res.data.code === 10000) {
             this.$message({
@@ -1264,56 +1394,56 @@ export default {
             this.single_case_update_dis = false;
             this.handleCurrentChange(1);
           } else {
-            this.$message.error(res.data.error);
+            this.$message.error(res.data.msg);
           }
         });
       }
     },
-    //调用排序方法
-    changeTableSort() {
-      this.selectcheckCase = this.select_check_case_sort(this.selectcheckCase)
-    },
-    //sorts值列表冒泡排序
-    select_check_case_sort(arr) {
-      var len = arr.length;
-      for (var i = 0; i < len - 1; i++) {
-        for (var j = 0; j < len - 1 - i; j++) {
-          // 相邻元素两两对比，元素交换，大的元素交换到后面
-          if (arr[j]['sorts'] > arr[j + 1]['sorts']) {
-            var temp = arr[j];
-            arr[j] = arr[j + 1];
-            arr[j + 1] = temp;
-          }
-        }
-      }
-      return arr;
-    },
+    // //调用排序方法
+    // changeTableSort() {
+    //   this.selectcheckCase = this.select_check_case_sort(this.selectcheckCase)
+    // },
+    // //sorts值列表冒泡排序
+    // select_check_case_sort(arr) {
+    //   var len = arr.length;
+    //   for (var i = 0; i < len - 1; i++) {
+    //     for (var j = 0; j < len - 1 - i; j++) {
+    //       // 相邻元素两两对比，元素交换，大的元素交换到后面
+    //       if (arr[j]['sorts'] > arr[j + 1]['sorts']) {
+    //         var temp = arr[j];
+    //         arr[j] = arr[j + 1];
+    //         arr[j + 1] = temp;
+    //       }
+    //     }
+    //   }
+    //   return arr;
+    // },
 
-    //输入框入职selectcheckcasesorts排序值
-    sort_input(sorts_num, index) {
-      if (sorts_num.length === 0) {
-        this.$message.error("不能为空，已重置")
-        return false
-      }
-      this.selectcheckCase[index].sorts = parseInt(sorts_num)
-      this.$set(this.selectcheckCase, index, this.selectcheckCase[index])
+    // //输入框入职selectcheckcasesorts排序值
+    // sort_input(sorts_num, index) {
+    //   if (sorts_num.length === 0) {
+    //     this.$message.error("不能为空，已重置")
+    //     return false
+    //   }
+    //   this.selectcheckCase[index].sorts = parseInt(sorts_num)
+    //   this.$set(this.selectcheckCase, index, this.selectcheckCase[index])
 
-      for (let i in this.selectcheckCase) {
-        if (parseInt(sorts_num) === this.selectcheckCase[i].sorts) {
-          for (let j = parseInt(i) + 1; j <= this.selectcheckCase.length; j++) {
-            if (j === this.selectcheckCase.length) {
-              break
-            }
-            if (parseInt(sorts_num) === this.selectcheckCase[j].sorts) {
-              // this.selectcheckCase[index].sorts = parseInt(0)
-              // this.$set(this.selectcheckCase,index,this.selectcheckCase[index])
-              this.$message.warning("存在相同顺序,请注意顺序");
-              break;
-            }
-          }
-        }
-      }
-    },
+    //   for (let i in this.selectcheckCase) {
+    //     if (parseInt(sorts_num) === this.selectcheckCase[i].sorts) {
+    //       for (let j = parseInt(i) + 1; j <= this.selectcheckCase.length; j++) {
+    //         if (j === this.selectcheckCase.length) {
+    //           break
+    //         }
+    //         if (parseInt(sorts_num) === this.selectcheckCase[j].sorts) {
+    //           // this.selectcheckCase[index].sorts = parseInt(0)
+    //           // this.$set(this.selectcheckCase,index,this.selectcheckCase[index])
+    //           this.$message.warning("存在相同顺序,请注意顺序");
+    //           break;
+    //         }
+    //       }
+    //     }
+    //   }
+    // },
 
     handleSelectionChange(val) {
       this.selectcheck = val
@@ -1325,7 +1455,7 @@ export default {
     //单用列表请求数据
     caselist() {
       this.caselistdialog = true
-      axios.post('/api/api_case/case/page', this.case_list_page_body).then((res) => {
+      axios.post('/api/test_case/CaseList', this.case_list_page_body).then((res) => {
         this.caselistdata = res.data.data
         this.case_total = res.data.totalNum
       })
@@ -1353,6 +1483,7 @@ export default {
     },
     //添加用例弹框页码切换
     handleCurrentChangeCase(val) {
+      console.log(this.case_list_page_body)
       this.case_list_page_body.page = val;
       this.caselist();
     },
@@ -1378,7 +1509,7 @@ export default {
     //获取账号信息
     get_account() {
       axios
-          .post("/api/test_management/AccountList", this.list_page_body)
+          .post("/api/test_management/AccountList", {page:1,limit:1000})
           .then((res) => {
             //api接口判断为code=10000成功
             if (res.data["code"] === 10000) {
@@ -1398,7 +1529,7 @@ export default {
     get_tag_name(raw) {
       let val = null;
       this.tags.forEach((item) => {
-        if (raw.tag === String(item.value)) {
+        if (raw.tag === item.value) {
           val = item.label
         }
       })
@@ -1409,12 +1540,12 @@ export default {
       let val = null;
       if (raw.module && raw.module !== "") {
         this.module_options.forEach((item) => {
-          if (raw.module[0] === item.id) {
+          if (eval(raw.module)[0] === item.id) {
             val = item.name
           }
           if (item.children) {
             item.children.forEach((dow_item) => {
-              if (raw.module[1] === dow_item.id) {
+              if (eval(raw.module)[1] === dow_item.id) {
                 val += '-'
                 val += dow_item.name
               }
@@ -1429,13 +1560,13 @@ export default {
     get_user_name() {
       this.user_name = localStorage.getItem('username')
     },
-    //新增用例项目下拉框
-    add_select_project(val) {
-      if (val) {
-        this.ruleForm.project_id = val;
-      } else {
-        delete this.ruleForm['projectId'];
-      }
+    // //新增用例项目下拉框
+    add_select_project() {
+      // if (val) {
+      //   this.ruleForm.project_id = val;
+      // } else {
+      //   delete this.ruleForm['projectId'];
+      // }
     },
     //json-editor空监听
     json_editor_error(val, type) {

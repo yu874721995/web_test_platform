@@ -8,12 +8,12 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
     devServer: {
-        host:'10.192.8.43',
-        port: 80,
+        host: '0.0.0.0',
+        port: 8001,
         disableHostCheck: true,
         proxy: {                      //vue-cli3以上的是proxy
             "/api": {         //自己随便起的名字
-                target: process.env.VUE_APP_BASE_API,    //你要访问的服务器的ip，如果不知道,打开cmd，输入ipconfig查看ipv4即可,
+                target: 'http://test-platform.xms-prod.yintaerp.com',    //你要访问的服务器的ip，如果不知道,打开cmd，输入ipconfig查看ipv4即可,
                 changeOrigin: true,
                 ws: true,
             }

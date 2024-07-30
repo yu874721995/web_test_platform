@@ -33,7 +33,7 @@ export default {
     ...mapGetters(["menuData"]),
     menuList() {
       console.log(this.menuData)
-      const obj = this.menuData.find((item) => item.title == "项目管理");
+      const obj = this.menuData.find((item) => item.title == "环境导航");
       return obj.children;
     },
   },
